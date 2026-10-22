@@ -1,0 +1,45 @@
+
+GET http://127.0.0.1:8000/
+GET http://127.0.0.1:8000/search?q={query}&page={page}
+GET http://127.0.0.1:8000/suggest?q={query}
+GET http://127.0.0.1:8000/docs
+GET http://127.0.0.1:8000/redoc
+GET http://127.0.0.1:8000/openapi.json
+
+
+
+
+
+
+code
+Markdown
+# Metasearch API Documentation
+
+## 1. Overview
+A fast, lightweight metasearch engine service that aggregates, dedupes, and ranks web results from DuckDuckGo, Yahoo, and Wikipedia with built-in in-memory caching.
+
+- **Base URL:** `http://127.0.0.1:8000`
+- **Protocol:** HTTP
+- **Content-Type:** `application/json`
+- **Authentication:** None required
+
+---
+
+## 2. Endpoints
+
+### 2.1 Web Search
+Aggregates live search results across DuckDuckGo, Yahoo, and Wikipedia.
+
+- **Method:** `GET`
+- **Path:** `/search`
+- **Full URL:** `http://127.0.0.1:8000/search`
+
+#### Query Parameters:
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `q` | `string` | **Yes** | — | The search query (minimum length: 1). |
+| `page` | `integer` | No | `1` | Page number for pagination (minimum: 1). |
+
+#### Request Example:
+```http
+GET http://127.0.0.1:8000/search?q=quantum+computing&page=1
