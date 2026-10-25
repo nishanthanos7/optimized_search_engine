@@ -1,388 +1,1770 @@
 <!DOCTYPE html>
-<html lang="en">
+<!--
+  Metasearch — single-file UI
+  ------------------------------------------------------------------
+  1. Head
+     · Theme boot (runs before paint)
+     · Styles
+        01 Design tokens         08 Results
+        02 Base & layout         09 Skeleton
+        03 Header shell          10 Pagination
+        04 Logo                  11 Empty / error states
+        05 Search box            12 Animations
+        06 Suggestions           13 Responsive
+        07 Theme toggle          14 Reduced motion
+  2. Body
+     · Theme toggle, header, search, results, pagination
+  3. App script (one IIFE, split into modules)
+     · Config, DOM, State, Utils, Theme, Suggestions,
+       Renderer, Search, App (history + boot)
+  ------------------------------------------------------------------
+-->
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metasearch</title>
-    <!-- Preconnect speeds up network roundtrips -->
+    <title>Metasearch — Search across the web</title>
+    <meta name="description" content="A fast metasearch engine that searches DuckDuckGo, Bing and Wikipedia at once.">
+    <meta name="theme-color" id="themeColor" content="#f7f9fd">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%234f7cff'/%3E%3Ccircle cx='45' cy='45' r='18' fill='none' stroke='white' stroke-width='8'/%3E%3Cpath d='M59 59 L74 74' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
     <link rel="preconnect" href="http://127.0.0.1:8000">
 
+    <script>
+        // Apply the saved/system theme before first paint to avoid a flash.
+        (function () {
+            var theme = 'light';
+            try {
+                var saved = localStorage.getItem('theme');
+                theme = (saved === 'light' || saved === 'dark')
+                    ? saved
+                    : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            } catch (e) { /* storage can be unavailable */ }
+            document.documentElement.dataset.theme = theme;
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', theme === 'dark' ? '#080d1a' : '#f7f9fd');
+        })();
+    </script>
+
     <style>
+        /* ==================================================================
+           Metasearch styles
+           ------------------------------------------------------------------
+           01 Design tokens     05 Search box      09 Skeleton
+           02 Base & layout     06 Suggestions     10 Pagination
+           03 Header shell      07 Theme toggle    11 Empty / error states
+           04 Logo              08 Results         12 Animations
+           13 Responsive        14 Reduced motion
+           ================================================================== */
+
+        /* ---------- 01 · Design tokens ---------- */
         :root {
-            --bg: #ffffff;
-            --text: #202124;
-            --snippet: #4d5156;
-            --link: #1a0dab;
-            --border: #ebebeb;
-            --search-bg: #ffffff;
-            --tag-bg: #f1f3f4;
-            --tag-text: #5f6368;
-            --shadow: rgba(32, 33, 36, 0.16);
-            --shimmer: #f0f0f0;
+            color-scheme: light;
+            --bg: #f7f9fd;
+            --surface: #ffffff;
+            --surface-2: #eef2f9;
+            --text: #0f172a;
+            --text-muted: #55617a;
+            --text-faint: #8a95ab;
+            --link: #1d4ed8;
+            --border: #e2e8f3;
+            --accent: #4f7cff;
+            --accent-2: #8b5cf6;
+            --accent-soft: rgba(79, 124, 255, 0.10);
+            --ring: rgba(79, 124, 255, 0.20);
+            --shadow: rgba(15, 23, 42, 0.10);
+            --header-bg: rgba(247, 249, 253, 0.82);
+            --glow-1: rgba(79, 124, 255, 0.14);
+            --glow-2: rgba(139, 92, 246, 0.10);
+            --skeleton-base: #e9eef7;
+            --skeleton-shine: #f8fafd;
+            --mark-bg: rgba(79, 124, 255, 0.16);
+            --danger: #d92d20;
+            --logo-a: #2563eb;
+            --logo-b: #7c3aed;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #202124;
-                --text: #e8eaed;
-                --snippet: #bdc1c6;
-                --link: #8ab4f8;
-                --border: #3c4043;
-                --search-bg: #303134;
-                --tag-bg: #3c4043;
-                --tag-text: #bdc1c6;
-                --shadow: rgba(0, 0, 0, 0.4);
-                --shimmer: #303134;
-            }
+        :root[data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #080d1a;
+            --surface: #111a2e;
+            --surface-2: #17233c;
+            --text: #e8eefc;
+            --text-muted: #a2aec7;
+            --text-faint: #7080a0;
+            --link: #8fb4ff;
+            --border: #223052;
+            --accent: #6b93ff;
+            --accent-2: #a78bfa;
+            --accent-soft: rgba(107, 147, 255, 0.14);
+            --ring: rgba(107, 147, 255, 0.24);
+            --shadow: rgba(0, 0, 0, 0.50);
+            --header-bg: rgba(8, 13, 26, 0.78);
+            --glow-1: rgba(79, 124, 255, 0.20);
+            --glow-2: rgba(139, 92, 246, 0.16);
+            --skeleton-base: #16213a;
+            --skeleton-shine: #1e2c4b;
+            --mark-bg: rgba(143, 180, 255, 0.20);
+            --danger: #ff8a8a;
+            --logo-a: #9bbcff;
+            --logo-b: #c4b5fd;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* ---------- 02 · Base & layout ---------- */
+        *,
+        *::before,
+        *::after { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
         body {
-            font-family: Arial, system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            margin: 0;
             min-height: 100vh;
+            font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--text);
+            background-color: var(--bg);
+            background-image:
+                radial-gradient(1100px 560px at 12% -12%, var(--glow-1), transparent 62%),
+                radial-gradient(900px 520px at 96% -4%, var(--glow-2), transparent 58%);
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
         body.home-layout {
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 96px 24px 64px;
         }
 
-        body.search-layout { display: block; padding-top: 20px; }
-
-        .header-container { display: flex; align-items: center; gap: 24px; width: 100%; }
-        body.home-layout .header-container {
-            flex-direction: column;
-            max-width: 600px;
-            padding: 20px;
-        }
-        body.search-layout .header-container {
-            flex-direction: row;
-            padding: 0 30px 15px 150px;
-            border-bottom: 1px solid var(--border);
+        body.search-layout {
+            display: block;
+            background-image:
+                radial-gradient(900px 420px at 8% -18%, var(--glow-1), transparent 60%),
+                radial-gradient(760px 400px at 98% -10%, var(--glow-2), transparent 58%);
         }
 
-        .logo {
-            font-size: 2.8rem;
-            font-weight: 700;
-            color: #4285f4;
-            text-decoration: none;
-            letter-spacing: -1px;
-        }
-        body.search-layout .logo { font-size: 1.8rem; }
+        ::selection { background: var(--accent); color: #fff; }
 
-        .search-wrapper { position: relative; width: 100%; max-width: 650px; }
-        .search-box {
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        [hidden] { display: none !important; }
+
+        /* ---------- 03 · Header shell ---------- */
+
+        .header-container {
             display: flex;
             align-items: center;
-            box-shadow: 0 1px 6px var(--shadow);
-            border-radius: 24px;
-            padding: 11px 20px;
-            background: var(--search-bg);
-            z-index: 2;
-            position: relative;
+            width: 100%;
         }
-        .search-box:hover, .search-box:focus-within { box-shadow: 0 2px 8px var(--shadow); }
 
-        input {
-            flex: 1;
-            border: none;
-            outline: none;
-            font-size: 16px;
-            margin-left: 10px;
-            background: transparent;
-            color: var(--text);
+        body.home-layout .header-container {
+            flex-direction: column;
+            max-width: 680px;
+            padding: 0;
         }
+
+        body.search-layout .header-container {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 13px 78px 13px clamp(16px, 4vw, 32px);
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            -webkit-backdrop-filter: blur(16px) saturate(150%);
+            backdrop-filter: blur(16px) saturate(150%);
+        }
+
+        /* ---------- 04 · Logo ---------- */
+
+        .logo {
+            display: inline-flex;
+            flex: 0 0 auto;
+            align-items: center;
+            gap: 13px;
+            color: var(--text);
+            text-decoration: none;
+            line-height: 1;
+        }
+
+        .logo-mark {
+            display: grid;
+            flex: 0 0 auto;
+            place-items: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            box-shadow: 0 12px 26px -10px rgba(79, 124, 255, 0.65),
+                inset 0 1px 0 rgba(255, 255, 255, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .logo:hover .logo-mark {
+            transform: translateY(-1px) rotate(-3deg);
+            box-shadow: 0 16px 32px -10px rgba(79, 124, 255, 0.75),
+                inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        }
+
+        .logo-mark svg { width: 26px; height: 26px; }
+
+        .logo-text {
+            font-size: 2.45rem;
+            font-weight: 800;
+            letter-spacing: -0.045em;
+            background: linear-gradient(120deg, var(--logo-a), var(--logo-b));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: var(--logo-a);
+        }
+
+        body.search-layout .logo { gap: 10px; }
+        body.search-layout .logo-mark { width: 38px; height: 38px; border-radius: 11px; }
+        body.search-layout .logo-mark svg { width: 20px; height: 20px; }
+        body.search-layout .logo-text { font-size: 1.3rem; letter-spacing: -0.035em; }
+
+        .home-tagline {
+            margin: 16px 0 0;
+            font-size: 16px;
+            color: var(--text-muted);
+            text-align: center;
+            letter-spacing: -0.005em;
+        }
+
+        body.search-layout .home-tagline,
+        body.search-layout .home-hint { display: none; }
+
+        /* ---------- 05 · Search box ---------- */
+
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 720px;
+        }
+
+        body.home-layout .search-wrapper { margin-top: 34px; }
+
+        body.search-layout .search-wrapper {
+            flex: 1 1 320px;
+            min-width: 0;
+            margin: 0;
+        }
+
+        .search-box {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 8px 8px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px -14px var(--shadow), 0 2px 8px -4px var(--shadow);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        body.home-layout .search-box {
+            padding: 12px 12px 12px 20px;
+            border-radius: 20px;
+            box-shadow: 0 22px 50px -24px var(--shadow), 0 4px 14px -8px var(--shadow);
+        }
+
+        .search-box:hover {
+            border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+        }
+
+        .search-box:focus-within {
+            border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+            box-shadow: 0 0 0 4px var(--ring), 0 18px 44px -18px var(--shadow);
+        }
+
+        .search-icon {
+            display: grid;
+            flex: 0 0 auto;
+            place-items: center;
+            color: var(--text-faint);
+            transition: color 0.2s ease;
+        }
+
+        .search-icon svg { width: 20px; height: 20px; }
+        body.home-layout .search-icon svg { width: 21px; height: 21px; }
+        .search-box:focus-within .search-icon { color: var(--accent); }
+
+        #queryInput {
+            flex: 1 1 auto;
+            min-width: 0;
+            padding: 6px 0;
+            font: inherit;
+            font-size: 16px;
+            color: var(--text);
+            background: transparent;
+            border: 0;
+            outline: none;
+        }
+
+        body.home-layout #queryInput { font-size: 17px; }
+
+        #queryInput::placeholder { color: var(--text-faint); opacity: 1; }
+
+        .clear-btn,
+        .submit-btn {
+            display: inline-grid;
+            flex: 0 0 auto;
+            place-items: center;
+            padding: 0;
+            cursor: pointer;
+            border: 0;
+            font-family: inherit;
+        }
+
+        .clear-btn {
+            width: 30px;
+            height: 30px;
+            color: var(--text-faint);
+            background: transparent;
+            border-radius: 50%;
+            transition: color 0.15s ease, background 0.15s ease;
+        }
+
+        .clear-btn:hover { color: var(--text); background: var(--surface-2); }
+        .clear-btn svg { width: 16px; height: 16px; }
+
+        .submit-btn {
+            width: 40px;
+            height: 40px;
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-radius: 12px;
+            box-shadow: 0 8px 18px -8px rgba(79, 124, 255, 0.7);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+        }
+
+        body.home-layout .submit-btn { width: 46px; height: 46px; border-radius: 14px; }
+
+        .submit-btn:hover {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px -8px rgba(79, 124, 255, 0.8);
+        }
+
+        .submit-btn:active { transform: scale(0.96); }
+        .submit-btn svg { width: 19px; height: 19px; }
+
+        /* ---------- 06 · Suggestions ---------- */
 
         .suggestions {
             display: none;
             position: absolute;
-            top: 40px;
+            top: calc(100% + 8px);
             left: 0;
             right: 0;
-            padding-top: 15px;
-            background: var(--search-bg);
-            border-radius: 0 0 24px 24px;
-            box-shadow: 0 4px 6px var(--shadow);
-            border: 1px solid var(--border);
+            z-index: 30;
+            padding: 6px;
             overflow: hidden;
-            z-index: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 24px 50px -20px var(--shadow), 0 8px 20px -14px var(--shadow);
+            animation: dropIn 0.16s ease both;
         }
 
         .suggestion-item {
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 15px;
             display: flex;
             align-items: center;
             gap: 12px;
+            padding: 10px 12px;
+            color: var(--text);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.12s ease, color 0.12s ease;
         }
-        .suggestion-item:hover, .suggestion-item.active { background: var(--tag-bg); }
 
-        .main-content { display: none; padding: 25px 0 50px 150px; max-width: 800px; }
+        .suggestion-item:hover,
+        .suggestion-item.active { background: var(--surface-2); }
+
+        .suggestion-icon {
+            display: grid;
+            flex: 0 0 auto;
+            place-items: center;
+            color: var(--text-faint);
+        }
+
+        .suggestion-item.active .suggestion-icon,
+        .suggestion-item:hover .suggestion-icon { color: var(--accent); }
+        .suggestion-icon svg { width: 16px; height: 16px; }
+
+        .suggestion-text {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            font-size: 14.5px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .suggestion-arrow {
+            flex: 0 0 auto;
+            width: 15px;
+            height: 15px;
+            color: var(--text-faint);
+            opacity: 0;
+            transform: translate(-3px, 3px);
+            transition: opacity 0.12s ease, transform 0.12s ease;
+        }
+
+        .suggestion-item:hover .suggestion-arrow,
+        .suggestion-item.active .suggestion-arrow {
+            opacity: 1;
+            transform: none;
+        }
+
+        .home-hint {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 22px 0 0;
+            font-size: 12.5px;
+            color: var(--text-faint);
+            text-align: center;
+        }
+
+        .home-hint .dot { color: var(--border); }
+        .home-hint kbd {
+            padding: 1px 6px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            box-shadow: 0 1px 0 var(--border);
+        }
+
+        /* ---------- 07 · Theme toggle ---------- */
+
+        .theme-toggle {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 100;
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            color: var(--text-muted);
+            cursor: pointer;
+            background: var(--header-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 6px 18px -10px var(--shadow);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            transition: color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .theme-toggle:hover {
+            color: var(--text);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px -10px var(--shadow);
+        }
+
+        .theme-toggle:active { transform: scale(0.96); }
+        .theme-toggle svg { width: 18px; height: 18px; }
+        .theme-toggle .icon-sun { display: none; }
+        :root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+        :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+        /* ---------- 08 · Main / results ---------- */
+
+        .main-content {
+            display: none;
+            width: 100%;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 28px clamp(16px, 4vw, 32px) 80px;
+        }
+
         body.search-layout .main-content { display: block; }
 
-        .result-item { margin-bottom: 26px; }
-        .result-url { font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-        .result-title { font-size: 20px; color: var(--link); text-decoration: none; line-height: 1.3; }
-        .result-title:hover { text-decoration: underline; }
-        .result-snippet { font-size: 14px; color: var(--snippet); line-height: 1.58; margin-top: 4px; }
-        .engines-tag {
-            font-size: 11px;
-            background: var(--tag-bg);
-            padding: 2px 7px;
-            border-radius: 4px;
-            color: var(--tag-text);
-            font-weight: bold;
+        .results-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px 16px;
+            margin: 2px 0 16px;
+            padding-bottom: 14px;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            animation: fadeUp 0.3s ease both;
         }
 
-        /* Fast shimmer animation for instant feedback */
-        .skeleton {
-            background: linear-gradient(90deg, var(--shimmer) 25%, var(--border) 50%, var(--shimmer) 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.2s infinite;
-            border-radius: 4px;
-            margin-bottom: 8px;
-        }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .results-meta:empty { display: none; }
+        .results-meta strong { font-weight: 600; color: var(--text); }
+        .meta-page { font-variant-numeric: tabular-nums; }
 
-        .g-pagination { display: flex; align-items: center; gap: 8px; margin-top: 35px; }
-        .g-pagination button {
-            color: #4285f4;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            padding: 6px 12px;
-            font-size: 14px;
+        .meta-loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
         }
-        .page-number {
-            width: 32px;
-            height: 32px;
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
             border-radius: 50%;
-            cursor: pointer;
-            color: #4285f4;
-            border: none;
-            background: transparent;
+            animation: spin 0.65s linear infinite;
         }
-        .page-number.active { color: #fff; background: #4285f4; }
 
-        @media (max-width: 768px) {
-            body.search-layout .header-container { padding: 15px; flex-direction: column; align-items: flex-start; }
-            .main-content { padding: 15px; }
+        .result-item {
+            position: relative;
+            padding: 14px 16px;
+            margin: 0 -16px 2px;
+            border-radius: 14px;
+            animation: fadeUp 0.36s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+            animation-delay: calc(var(--i, 0) * 32ms);
+            transition: background 0.15s ease;
         }
+
+        .result-item:hover { background: var(--surface); }
+
+        .result-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            margin-bottom: 7px;
+        }
+
+        .favicon {
+            position: relative;
+            display: grid;
+            flex: 0 0 auto;
+            place-items: center;
+            width: 28px;
+            height: 28px;
+            overflow: hidden;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .favicon img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            padding: 5px;
+            object-fit: contain;
+            background: var(--surface);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .result-source {
+            display: flex;
+            flex: 0 1 auto;
+            align-items: baseline;
+            gap: 6px;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .result-domain {
+            overflow: hidden;
+            max-width: 280px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .result-path {
+            overflow: hidden;
+            min-width: 0;
+            font-size: 12px;
+            color: var(--text-faint);
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .result-tags {
+            display: flex;
+            flex: 0 0 auto;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: flex-end;
+            margin-left: auto;
+        }
+
+        .engines-tag {
+            padding: 2px 7px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.035em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .engines-tag.eng-ddg {
+            color: #b24a22;
+            background: rgba(222, 88, 51, 0.09);
+            border-color: rgba(222, 88, 51, 0.20);
+        }
+
+        .engines-tag.eng-bing {
+            color: #08708f;
+            background: rgba(0, 120, 212, 0.09);
+            border-color: rgba(0, 120, 212, 0.20);
+        }
+
+        .engines-tag.eng-wiki {
+            color: #4b5563;
+            background: rgba(75, 85, 99, 0.09);
+            border-color: rgba(75, 85, 99, 0.20);
+        }
+
+        .engines-tag.eng-default {
+            color: var(--accent);
+            background: var(--accent-soft);
+            border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+        }
+
+        :root[data-theme="dark"] .engines-tag.eng-ddg {
+            color: #ffb59c;
+            background: rgba(222, 88, 51, 0.14);
+            border-color: rgba(222, 88, 51, 0.30);
+        }
+
+        :root[data-theme="dark"] .engines-tag.eng-bing {
+            color: #8fd4f5;
+            background: rgba(0, 120, 212, 0.16);
+            border-color: rgba(0, 120, 212, 0.32);
+        }
+
+        :root[data-theme="dark"] .engines-tag.eng-wiki {
+            color: #c3cad8;
+            background: rgba(148, 163, 184, 0.13);
+            border-color: rgba(148, 163, 184, 0.26);
+        }
+
+        .result-title {
+            display: block;
+            font-size: 19px;
+            font-weight: 600;
+            line-height: 1.35;
+            letter-spacing: -0.012em;
+            color: var(--link);
+            text-decoration: none;
+        }
+
+        .result-title:hover {
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 3px;
+        }
+
+        .result-title mark,
+        .result-snippet mark {
+            color: inherit;
+            background: var(--mark-bg);
+            border-radius: 3px;
+            padding: 0 1px;
+        }
+
+        .result-snippet {
+            max-width: 74ch;
+            margin: 5px 0 0;
+            font-size: 14px;
+            line-height: 1.62;
+            color: var(--text-muted);
+        }
+
+        /* ---------- 09 · Skeleton ---------- */
+
+        .skeleton-card {
+            padding: 14px 16px;
+            margin: 0 -16px 2px;
+        }
+
+        .skeleton {
+            background: linear-gradient(
+                100deg,
+                var(--skeleton-base) 20%,
+                var(--skeleton-shine) 38%,
+                var(--skeleton-base) 56%
+            );
+            background-size: 220% 100%;
+            border-radius: 6px;
+            animation: shimmer 1.35s linear infinite;
+        }
+
+        .skeleton-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .sk-fav { width: 28px; height: 28px; border-radius: 8px; }
+        .sk-url { width: 170px; max-width: 45%; height: 12px; }
+        .sk-title { width: 56%; height: 20px; margin-bottom: 9px; }
+        .sk-line { width: 92%; height: 12px; margin-bottom: 7px; }
+        .sk-line.short { width: 68%; margin-bottom: 0; }
+
+        /* ---------- 10 · Pagination ---------- */
+
+        .pagination {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 34px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .page-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-width: 38px;
+            height: 38px;
+            padding: 0 13px;
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease,
+                box-shadow 0.15s ease, transform 0.15s ease;
+        }
+
+        .page-btn:hover:not(:disabled):not(.active) {
+            color: var(--text);
+            background: var(--surface);
+            border-color: var(--border);
+        }
+
+        .page-btn:active:not(:disabled) { transform: scale(0.96); }
+
+        .page-btn.active {
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-color: transparent;
+            box-shadow: 0 8px 18px -8px rgba(79, 124, 255, 0.7);
+            cursor: default;
+        }
+
+        .page-btn:disabled {
+            color: var(--text-faint);
+            cursor: not-allowed;
+            opacity: 0.45;
+        }
+
+        .page-btn svg { width: 16px; height: 16px; }
+        .page-arrow { padding: 0 12px; }
+
+        /* ---------- 11 · Empty / error states ---------- */
+
+        .state-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 7px;
+            padding: 56px 24px;
+            margin-top: 8px;
+            text-align: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            animation: fadeUp 0.35s ease both;
+        }
+
+        .state-icon {
+            display: grid;
+            place-items: center;
+            width: 58px;
+            height: 58px;
+            margin-bottom: 6px;
+            color: var(--text-faint);
+            background: var(--surface-2);
+            border-radius: 17px;
+        }
+
+        .state-icon svg { width: 26px; height: 26px; }
+        .state-card h2 { margin: 0; font-size: 18px; letter-spacing: -0.015em; }
+        .state-card p {
+            max-width: 46ch;
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .state-btn {
+            margin-top: 14px;
+            padding: 10px 18px;
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border: 0;
+            border-radius: 10px;
+            box-shadow: 0 8px 18px -9px rgba(79, 124, 255, 0.75);
+            transition: transform 0.15s ease, filter 0.15s ease;
+        }
+
+        .state-btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+        .state-btn:active { transform: scale(0.97); }
+
+        /* ---------- 12 · Animations ---------- */
+
+        @keyframes shimmer {
+            0% { background-position: 120% 0; }
+            100% { background-position: -120% 0; }
+        }
+
+        @keyframes dropIn {
+            from { opacity: 0; transform: translateY(-6px) scale(0.99); }
+            to { opacity: 1; transform: none; }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ---------- 13 · Responsive ---------- */
+
+        @media (max-width: 760px) {
+            body.home-layout { padding: 88px 18px 48px; }
+            .logo-text { font-size: 2.1rem; }
+            .logo-mark { width: 46px; height: 46px; border-radius: 14px; }
+            .logo-mark svg { width: 24px; height: 24px; }
+            .home-tagline { margin-top: 13px; font-size: 15px; }
+            body.home-layout .search-wrapper { margin-top: 28px; }
+            .suggestions { border-radius: 14px; }
+
+            body.search-layout .header-container {
+                gap: 12px;
+                padding: 10px 66px 10px 14px;
+            }
+
+            body.search-layout .logo-text { display: none; }
+
+            body.search-layout .main-content {
+                padding: 20px 16px 60px;
+            }
+
+            .result-item { padding: 12px 10px; margin: 0 -10px 2px; }
+            .skeleton-card { padding: 12px 10px; margin: 0 -10px 2px; }
+            .result-title { font-size: 17px; }
+            .result-snippet { font-size: 13.5px; }
+            .result-domain { max-width: 170px; }
+            .sk-title { width: 72%; }
+            .page-arrow span { display: none; }
+            .page-btn { padding: 0 10px; }
+            .theme-toggle { top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 11px; }
+        }
+
+        @media (max-width: 560px) {
+            .result-path { display: none; }
+            .result-tags { gap: 4px; }
+            .result-head { gap: 8px; }
+        }
+
+        @media (max-width: 400px) {
+            .logo-text { font-size: 1.85rem; }
+            .logo-mark { width: 42px; height: 42px; }
+            body.home-layout .search-box { padding: 8px 8px 8px 15px; border-radius: 17px; }
+            body.home-layout .submit-btn { width: 42px; height: 42px; border-radius: 12px; }
+            body.home-layout #queryInput { font-size: 16px; }
+            .home-hint { font-size: 11.5px; }
+        }
+
+        /* ---------- 14 · Reduced motion ---------- */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
     </style>
 </head>
 <body class="home-layout">
-
-    <div class="header-container">
-        <a href="/" class="logo">Metasearch</a>
-        <div class="search-wrapper">
-            <form id="searchForm" class="search-box">
-                <span style="color:#9aa0a6">&#128269;</span>
-                <input type="text" id="queryInput" placeholder="Search the web..." autocomplete="off" required>
-            </form>
-            <div id="suggestions" class="suggestions"></div>
-        </div>
-    </div>
-
-    <div class="main-content">
-        <div id="resultsContainer"></div>
-        <div id="paginationContainer"></div>
-    </div>
-
     <script>
-        const BASE = window.location.origin.startsWith('http') ? window.location.origin : 'http://127.0.0.1:8000';
-        
-        // Browser Instant Cache (0 ms load when revisiting)
-        const clientCache = new Map();
-        
-        const form = document.getElementById("searchForm");
-        const input = document.getElementById("queryInput");
-        const suggestionsBox = document.getElementById("suggestions");
-        const resultsContainer = document.getElementById("resultsContainer");
-        const paginationContainer = document.getElementById("paginationContainer");
+        // Switch to the results layout immediately when a query is present.
+        if ((new URLSearchParams(window.location.search).get('q') || '').trim()) {
+            document.body.classList.remove('home-layout');
+            document.body.classList.add('search-layout');
+        }
+    </script>
 
-        let debounceTimer, activeIndex = -1, currentSuggestions = [];
-        let suggestAbort = null, searchAbort = null;
-        let currentQuery = "", currentPage = 1;
+    <!-- Theme toggle -->
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme" title="Switch theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+        </svg>
+    </button>
 
-        // Restore state from URL query
-        window.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const q = params.get('q');
-            if (q) {
-                input.value = q;
-                fetchResults(q, parseInt(params.get('page')) || 1, false);
-            }
-        });
+    <!-- Header: brand + search + suggestions -->
+    <header class="header-container">
+        <a href="/" class="logo" aria-label="Metasearch home">
+            <span class="logo-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="10.8" cy="10.8" r="6.8"/>
+                    <path d="m20 20-4.1-4.1"/>
+                </svg>
+            </span>
+            <span class="logo-text">Metasearch</span>
+        </a>
 
-        // Instant Autocomplete with AbortController
-        input.addEventListener("input", () => {
-            clearTimeout(debounceTimer);
-            const q = input.value.trim();
-            if (!q) { suggestionsBox.style.display = 'none'; return; }
+        <p class="home-tagline">Every corner of the web, one search away.</p>
 
-            debounceTimer = setTimeout(async () => {
-                if (suggestAbort) suggestAbort.abort(); // Cancel previous unfinished fetch
-                suggestAbort = new AbortController();
+        <div class="search-wrapper">
+            <form id="searchForm" class="search-box" role="search">
+                <span class="search-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="m20 20-3.6-3.6"/>
+                    </svg>
+                </span>
+                <input
+                    type="text"
+                    id="queryInput"
+                    name="q"
+                    placeholder="Search the web..."
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    required
+                    aria-label="Search the web"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-expanded="false"
+                    aria-controls="suggestions"
+                >
+                <button type="button" id="clearBtn" class="clear-btn" hidden aria-label="Clear search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6 6 18"/>
+                    </svg>
+                </button>
+                <button type="submit" class="submit-btn" aria-label="Search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 12h14"/>
+                        <path d="m13 6 6 6-6 6"/>
+                    </svg>
+                </button>
+            </form>
+            <div id="suggestions" class="suggestions" role="listbox" aria-label="Search suggestions"></div>
+        </div>
 
-                try {
-                    const res = await fetch(`${BASE}/suggest?q=${encodeURIComponent(q)}`, { signal: suggestAbort.signal });
-                    const data = await res.json();
-                    renderSuggestions(data.suggestions || []);
-                } catch (e) {
-                    if (e.name !== 'AbortError') suggestionsBox.style.display = 'none';
-                }
-            }, 100); // Super-responsive 100ms debounce
-        });
+        <p class="home-hint">
+            Press <kbd>/</kbd> to focus
+            <span class="dot" aria-hidden="true">·</span>
+            Searches DuckDuckGo, Bing &amp; Wikipedia
+        </p>
+    </header>
 
-        function renderSuggestions(list) {
-            currentSuggestions = list;
-            if (!list.length) { suggestionsBox.style.display = 'none'; return; }
-            suggestionsBox.innerHTML = list.map(s => `
-                <div class="suggestion-item">
-                    <span style="color:#9aa0a6">&#128269;</span>
-                    <span>${s}</span>
-                </div>
-            `).join('');
-            
-            document.querySelectorAll('.suggestion-item').forEach((item, index) => {
-                item.addEventListener('click', () => {
-                    input.value = currentSuggestions[index];
-                    suggestionsBox.style.display = 'none';
-                    fetchResults(input.value, 1, true);
-                });
+    <!-- Results -->
+    <main class="main-content">
+        <div id="resultsMeta" class="results-meta" aria-live="polite"></div>
+        <div id="resultsContainer" class="results"></div>
+        <div id="paginationContainer"></div>
+    </main>
+
+    <!-- App script: one IIFE, split into modules -->
+    <script>
+        (() => {
+            'use strict';
+
+            /* ==============================================================
+               01 · Config
+               ============================================================== */
+            const CONFIG = Object.freeze({
+                baseUrl: window.location.origin.startsWith('http')
+                    ? window.location.origin
+                    : 'http://127.0.0.1:8000',
+                suggestDebounce: 120,
+                maxSuggestions: 8,
+                skeletonRows: 4,
+                pageWindow: 7,
+                pageLead: 3
             });
-            suggestionsBox.style.display = 'block';
-        }
 
-        // Keyboard arrow navigation for suggestions
-        input.addEventListener("keydown", (e) => {
-            const items = document.querySelectorAll('.suggestion-item');
-            if (!items.length) return;
+            /* ==============================================================
+               02 · DOM references
+               ============================================================== */
+            const dom = {
+                form: document.getElementById('searchForm'),
+                input: document.getElementById('queryInput'),
+                clearBtn: document.getElementById('clearBtn'),
+                suggestions: document.getElementById('suggestions'),
+                results: document.getElementById('resultsContainer'),
+                meta: document.getElementById('resultsMeta'),
+                pagination: document.getElementById('paginationContainer'),
+                themeToggle: document.getElementById('themeToggle'),
+                themeColor: document.getElementById('themeColor')
+            };
 
-            if (e.key === "ArrowDown") {
-                e.preventDefault();
-                activeIndex = (activeIndex + 1) % items.length;
-            } else if (e.key === "ArrowUp") {
-                e.preventDefault();
-                activeIndex = (activeIndex - 1 + items.length) % items.length;
-            } else if (e.key === "Enter" && activeIndex >= 0) {
-                e.preventDefault();
-                input.value = currentSuggestions[activeIndex];
-                suggestionsBox.style.display = 'none';
-                fetchResults(input.value, 1, true);
-                return;
-            }
-            items.forEach((el, idx) => el.classList.toggle('active', idx === activeIndex));
-        });
+            /* ==============================================================
+               03 · App state
+               ============================================================== */
+            const state = {
+                cache: new Map(),       // Instant in-tab results cache.
+                query: '',
+                page: 1,
+                resultCount: 0,
+                searchSequence: 0,      // Guards against out-of-order responses.
+                searchAbort: null
+            };
 
-        document.addEventListener("click", e => {
-            if (!e.target.closest('.search-wrapper')) suggestionsBox.style.display = 'none';
-        });
+            /* ==============================================================
+               04 · Utilities
+               ============================================================== */
+            const Utils = {
+                escapeHtml(value) {
+                    return String(value == null ? '' : value).replace(/[&<>"']/g, character => ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;'
+                    }[character]));
+                },
 
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const q = input.value.trim();
-            if (q) fetchResults(q, 1, true);
-        });
+                safeUrl(value) {
+                    try {
+                        const url = new URL(String(value), window.location.href);
+                        return (url.protocol === 'http:' || url.protocol === 'https:') ? url.href : '';
+                    } catch (error) {
+                        return '';
+                    }
+                },
 
-        // Fetch Search Results (Cached + Abortable)
-        async function fetchResults(query, page, updateUrl) {
-            suggestionsBox.style.display = 'none';
-            currentQuery = query;
-            currentPage = page;
+                highlight(text, query) {
+                    const source = String(text == null ? '' : text);
+                    const terms = Array.from(new Set((String(query).toLowerCase().match(/[\w-]+/g) || [])))
+                        .filter(term => term.length > 1)
+                        .sort((a, b) => b.length - a.length);
 
-            if (updateUrl) {
-                const u = new URL(window.location);
-                u.searchParams.set('q', query);
-                u.searchParams.set('page', page);
-                window.history.pushState({}, '', u);
-            }
+                    if (!terms.length) return Utils.escapeHtml(source);
 
-            document.body.className = 'search-layout';
-            window.scrollTo(0, 0);
+                    const pattern = new RegExp(
+                        '(' + terms.map(term => term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')',
+                        'gi'
+                    );
 
-            // 1. Instant Cache Check (Zero Latency!)
-            const cacheKey = `${query}:${page}`;
-            if (clientCache.has(cacheKey)) {
-                renderResults(clientCache.get(cacheKey));
-                renderPagination();
-                return;
-            }
+                    return source
+                        .split(pattern)
+                        .map((part, index) => (index % 2 === 1
+                            ? '<mark>' + Utils.escapeHtml(part) + '</mark>'
+                            : Utils.escapeHtml(part)))
+                        .join('');
+                },
 
-            // 2. Render Fast Skeleton Placeholder
-            renderSkeleton();
+                engineClass(name) {
+                    const value = String(name).toLowerCase();
+                    if (value.includes('duck')) return 'eng-ddg';
+                    if (value.includes('bing')) return 'eng-bing';
+                    if (value.includes('wiki')) return 'eng-wiki';
+                    return 'eng-default';
+                },
 
-            // 3. Network Fetch
-            if (searchAbort) searchAbort.abort();
-            searchAbort = new AbortController();
-
-            try {
-                const res = await fetch(`${BASE}/search?q=${encodeURIComponent(query)}&page=${page}`, { signal: searchAbort.signal });
-                const data = await res.json();
-                const results = data.results || [];
-                
-                // Store in browser memory
-                clientCache.set(cacheKey, results);
-
-                renderResults(results);
-                renderPagination();
-            } catch (err) {
-                if (err.name !== 'AbortError') {
-                    resultsContainer.innerHTML = '<p style="color:#e53935; padding:20px 0;">Search failed. Please try again.</p>';
+                isTypingTarget(element) {
+                    return !!element && (
+                        element.tagName === 'INPUT' ||
+                        element.tagName === 'TEXTAREA' ||
+                        element.isContentEditable
+                    );
                 }
-            }
-        }
+            };
 
-        function renderSkeleton() {
-            resultsContainer.innerHTML = [1, 2, 3, 4].map(() => `
-                <div style="margin-bottom: 28px;">
-                    <div class="skeleton" style="width: 200px; height: 14px;"></div>
-                    <div class="skeleton" style="width: 450px; height: 22px;"></div>
-                    <div class="skeleton" style="width: 100%; height: 35px;"></div>
-                </div>
-            `).join('');
-            paginationContainer.innerHTML = '';
-        }
+            /* ==============================================================
+               05 · Theme module
+               ============================================================== */
+            const Theme = {
+                media: window.matchMedia('(prefers-color-scheme: dark)'),
 
-        function renderResults(results) {
-            if (!results.length) {
-                resultsContainer.innerHTML = `<p style="padding:20px 0;">No results found.</p>`;
-                return;
-            }
+                readStored() {
+                    try {
+                        const value = localStorage.getItem('theme');
+                        return (value === 'light' || value === 'dark') ? value : null;
+                    } catch (error) {
+                        return null;
+                    }
+                },
 
-            resultsContainer.innerHTML = results.map(item => {
-                let domain = "";
-                try { domain = new URL(item.url).hostname.replace(/^www\./, ''); } catch { domain = item.url; }
-                return `
-                    <div class="result-item">
-                        <div class="result-url">
-                            <span>${domain}</span>
-                            <span class="engines-tag">${item.engines.join(", ")}</span>
+                store(theme) {
+                    try { localStorage.setItem('theme', theme); } catch (error) { /* ignore */ }
+                },
+
+                apply(theme) {
+                    const nextTheme = theme === 'dark' ? 'dark' : 'light';
+                    document.documentElement.dataset.theme = nextTheme;
+
+                    if (dom.themeColor) {
+                        dom.themeColor.setAttribute('content', nextTheme === 'dark' ? '#080d1a' : '#f7f9fd');
+                    }
+
+                    if (dom.themeToggle) {
+                        const label = nextTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+                        dom.themeToggle.setAttribute('aria-label', label);
+                        dom.themeToggle.setAttribute('title', label);
+                    }
+                },
+
+                toggle() {
+                    const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+                    Theme.apply(nextTheme);
+                    Theme.store(nextTheme);
+                },
+
+                init() {
+                    dom.themeToggle.addEventListener('click', () => Theme.toggle());
+
+                    if (typeof Theme.media.addEventListener === 'function') {
+                        Theme.media.addEventListener('change', event => {
+                            if (!Theme.readStored()) {
+                                Theme.apply(event.matches ? 'dark' : 'light');
+                            }
+                        });
+                    }
+
+                    Theme.apply(
+                        document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
+                    );
+                }
+            };
+
+            /* ==============================================================
+               06 · Suggestions module
+               ============================================================== */
+            const Suggestions = {
+                timer: null,
+                abortController: null,
+                items: [],
+                activeIndex: -1,
+
+                hide() {
+                    Suggestions.cancel();
+                    dom.suggestions.style.display = 'none';
+                    dom.input.setAttribute('aria-expanded', 'false');
+                    dom.input.removeAttribute('aria-activedescendant');
+                    Suggestions.activeIndex = -1;
+
+                    const activeItem = dom.suggestions.querySelector('.suggestion-item.active');
+                    if (activeItem) activeItem.classList.remove('active');
+                },
+
+                cancel() {
+                    if (Suggestions.abortController) {
+                        Suggestions.abortController.abort();
+                        Suggestions.abortController = null;
+                    }
+                    clearTimeout(Suggestions.timer);
+                    Suggestions.timer = null;
+                },
+
+                updateActiveItem() {
+                    const items = dom.suggestions.querySelectorAll('.suggestion-item');
+
+                    items.forEach((item, index) => {
+                        const selected = index === Suggestions.activeIndex;
+                        item.classList.toggle('active', selected);
+                        item.setAttribute('aria-selected', selected ? 'true' : 'false');
+                    });
+
+                    if (Suggestions.activeIndex >= 0 && items[Suggestions.activeIndex]) {
+                        dom.input.setAttribute('aria-activedescendant', items[Suggestions.activeIndex].id);
+                        items[Suggestions.activeIndex].scrollIntoView({ block: 'nearest' });
+                    } else {
+                        dom.input.removeAttribute('aria-activedescendant');
+                    }
+                },
+
+                choose(index) {
+                    const value = Suggestions.items[index];
+                    if (!value) return;
+
+                    dom.input.value = value;
+                    dom.clearBtn.hidden = false;
+                    Suggestions.hide();
+                    Search.run(value, 1, true);
+                },
+
+                render(list) {
+                    Suggestions.items = (Array.isArray(list) ? list : [])
+                        .map(suggestion => String(suggestion == null ? '' : suggestion))
+                        .filter(Boolean)
+                        .slice(0, CONFIG.maxSuggestions);
+                    Suggestions.activeIndex = -1;
+                    dom.input.removeAttribute('aria-activedescendant');
+
+                    if (!Suggestions.items.length) {
+                        Suggestions.hide();
+                        return;
+                    }
+
+                    dom.suggestions.innerHTML = Suggestions.items.map((suggestion, index) => `
+                        <div class="suggestion-item" id="suggestion-${index}" role="option" aria-selected="false">
+                            <span class="suggestion-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="7"/>
+                                    <path d="m20 20-3.6-3.6"/>
+                                </svg>
+                            </span>
+                            <span class="suggestion-text">${Utils.escapeHtml(suggestion)}</span>
+                            <svg class="suggestion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M7 17 17 7"/>
+                                <path d="M8 7h9v9"/>
+                            </svg>
                         </div>
-                        <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="result-title">${item.title}</a>
-                        <div class="result-snippet">${item.snippet}</div>
-                    </div>
-                `;
-            }).join('');
-        }
+                    `).join('');
 
-        function renderPagination() {
-            let html = '<div class="g-pagination">';
-            html += `<button ${currentPage === 1 ? 'disabled style="color:#9aa0a6"' : ''} onclick="fetchResults(currentQuery, ${currentPage - 1}, true)">Previous</button>`;
-            
-            let start = Math.max(1, currentPage - 3);
-            for (let i = start; i < start + 7; i++) {
-                html += `<button class="page-number ${i === currentPage ? 'active' : ''}" onclick="fetchResults(currentQuery, ${i}, true)">${i}</button>`;
-            }
-            
-            html += `<button onclick="fetchResults(currentQuery, ${currentPage + 1}, true)">Next</button></div>`;
-            paginationContainer.innerHTML = html;
-        }
+                    dom.suggestions.querySelectorAll('.suggestion-item').forEach((item, index) => {
+                        item.addEventListener('click', () => Suggestions.choose(index));
+                    });
+
+                    dom.suggestions.style.display = 'block';
+                    dom.input.setAttribute('aria-expanded', 'true');
+                },
+
+                async request(query) {
+                    if (Suggestions.abortController) Suggestions.abortController.abort();
+                    Suggestions.abortController = new AbortController();
+                    const controller = Suggestions.abortController;
+
+                    try {
+                        const response = await fetch(
+                            `${CONFIG.baseUrl}/suggest?q=${encodeURIComponent(query)}`,
+                            { signal: controller.signal }
+                        );
+                        if (!response.ok) throw new Error('Suggestion request failed');
+
+                        const data = await response.json();
+                        if (controller.signal.aborted || dom.input.value.trim() !== query) return;
+
+                        Suggestions.render(data && data.suggestions);
+                    } catch (error) {
+                        if (error.name !== 'AbortError') Suggestions.hide();
+                    }
+                },
+
+                handleInput() {
+                    dom.clearBtn.hidden = !dom.input.value;
+                    Suggestions.activeIndex = -1;
+                    clearTimeout(Suggestions.timer);
+
+                    const query = dom.input.value.trim();
+                    if (!query) {
+                        Suggestions.hide();
+                        return;
+                    }
+
+                    Suggestions.timer = setTimeout(
+                        () => Suggestions.request(query),
+                        CONFIG.suggestDebounce
+                    );
+                },
+
+                handleKeydown(event) {
+                    if (event.key === 'Escape') {
+                        if (dom.suggestions.style.display === 'block') {
+                            event.preventDefault();
+                            Suggestions.hide();
+                        }
+                        return;
+                    }
+
+                    if (dom.suggestions.style.display !== 'block') return;
+
+                    const items = dom.suggestions.querySelectorAll('.suggestion-item');
+                    if (!items.length) return;
+
+                    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                        event.preventDefault();
+
+                        if (Suggestions.activeIndex < 0) {
+                            Suggestions.activeIndex = event.key === 'ArrowDown' ? 0 : items.length - 1;
+                        } else {
+                            const step = event.key === 'ArrowDown' ? 1 : -1;
+                            Suggestions.activeIndex =
+                                (Suggestions.activeIndex + step + items.length) % items.length;
+                        }
+
+                        Suggestions.updateActiveItem();
+                    } else if (event.key === 'Enter' && Suggestions.activeIndex >= 0) {
+                        event.preventDefault();
+                        Suggestions.choose(Suggestions.activeIndex);
+                    }
+                },
+
+                init() {
+                    dom.input.addEventListener('input', () => Suggestions.handleInput());
+                    dom.input.addEventListener('keydown', event => Suggestions.handleKeydown(event));
+
+                    document.addEventListener('click', event => {
+                        if (!event.target.closest('.search-wrapper')) Suggestions.hide();
+                    });
+
+                    dom.clearBtn.addEventListener('click', () => {
+                        dom.input.value = '';
+                        dom.clearBtn.hidden = true;
+                        Suggestions.hide();
+                        dom.input.focus();
+                    });
+                }
+            };
+
+            /* ==============================================================
+               07 · Renderer module
+               ============================================================== */
+            const ICONS = Object.freeze({
+                searchOff: `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="m20 20-3.6-3.6"/>
+                        <path d="M8.5 11h5"/>
+                    </svg>`,
+                alert: `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.3 3.6 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/>
+                        <path d="M12 9v4"/>
+                        <path d="M12 17h.01"/>
+                    </svg>`,
+                chevronLeft: `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>`,
+                chevronRight: `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>`
+            });
+
+            const Renderer = {
+                meta() {
+                    if (!state.query) {
+                        dom.meta.innerHTML = '';
+                        return;
+                    }
+
+                    const countLabel = state.resultCount === 1 ? '1 result' : `${state.resultCount} results`;
+                    const summary = state.resultCount
+                        ? `Showing <strong>${countLabel}</strong> for <strong>${Utils.escapeHtml(state.query)}</strong>`
+                        : `No results for <strong>${Utils.escapeHtml(state.query)}</strong>`;
+
+                    dom.meta.innerHTML = `${summary}<span class="meta-page">Page ${state.page}</span>`;
+                },
+
+                skeleton() {
+                    state.resultCount = 0;
+                    dom.results.setAttribute('aria-busy', 'true');
+                    dom.meta.innerHTML = `
+                        <span class="meta-loading">
+                            <span class="spinner" aria-hidden="true"></span>
+                            Searching for <strong>${Utils.escapeHtml(state.query)}</strong>…
+                        </span>
+                        <span class="meta-page">Page ${state.page}</span>`;
+
+                    dom.results.innerHTML = Array.from({ length: CONFIG.skeletonRows }, () => `
+                        <div class="skeleton-card" aria-hidden="true">
+                            <div class="skeleton-head">
+                                <div class="skeleton sk-fav"></div>
+                                <div class="skeleton sk-url"></div>
+                            </div>
+                            <div class="skeleton sk-title"></div>
+                            <div class="skeleton sk-line"></div>
+                            <div class="skeleton sk-line short"></div>
+                        </div>
+                    `).join('');
+
+                    dom.pagination.innerHTML = '';
+                },
+
+                card(item, index) {
+                    const href = Utils.safeUrl(item.url);
+                    let domain = '';
+                    let path = '';
+
+                    try {
+                        const parsed = new URL(href);
+                        domain = parsed.hostname.replace(/^www\./i, '');
+                        path = parsed.pathname === '/' ? '' : parsed.pathname + parsed.search;
+                        if (path.length > 64) path = path.slice(0, 61) + '…';
+                    } catch (error) {
+                        domain = String(item.url || '');
+                    }
+
+                    if (!domain) domain = 'Source';
+
+                    const title = String(item.title || href || domain);
+                    const snippet = item.snippet == null ? '' : String(item.snippet);
+                    const engines = Array.from(new Set(
+                        (Array.isArray(item.engines) ? item.engines : [])
+                            .map(String)
+                            .filter(Boolean)
+                    ));
+                    const tags = engines
+                        .map(engine => `<span class="engines-tag ${Utils.engineClass(engine)}">${Utils.escapeHtml(engine)}</span>`)
+                        .join('');
+                    const favicon = `https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(domain)}`;
+
+                    return `
+                        <article class="result-item" style="--i:${Math.min(index, 8)}">
+                            <div class="result-head">
+                                <span class="favicon" aria-hidden="true">
+                                    <span class="favicon-letter">${Utils.escapeHtml(domain.charAt(0).toUpperCase())}</span>
+                                    <img
+                                        src="${Utils.escapeHtml(favicon)}"
+                                        alt=""
+                                        width="16"
+                                        height="16"
+                                        loading="lazy"
+                                        onload="this.style.opacity=1"
+                                        onerror="this.remove()"
+                                    >
+                                </span>
+                                <span class="result-source">
+                                    <span class="result-domain">${Utils.escapeHtml(domain)}</span>
+                                    ${path ? `<span class="result-path">${Utils.escapeHtml(path)}</span>` : ''}
+                                </span>
+                                ${tags ? `<span class="result-tags">${tags}</span>` : ''}
+                            </div>
+                            <a class="result-title" href="${Utils.escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${Utils.highlight(title, state.query)}</a>
+                            ${snippet ? `<p class="result-snippet">${Utils.highlight(snippet, state.query)}</p>` : ''}
+                        </article>`;
+                },
+
+                results(results) {
+                    const items = (Array.isArray(results) ? results : [])
+                        .filter(item => item && typeof item === 'object' && Utils.safeUrl(item.url));
+
+                    state.resultCount = items.length;
+                    dom.results.setAttribute('aria-busy', 'false');
+                    Renderer.meta();
+
+                    if (!items.length) {
+                        dom.results.innerHTML = `
+                            <div class="state-card">
+                                <div class="state-icon" aria-hidden="true">${ICONS.searchOff}</div>
+                                <h2>No results for “${Utils.escapeHtml(state.query)}”</h2>
+                                <p>Try a different spelling, a broader phrase, or fewer keywords.</p>
+                            </div>`;
+                        dom.pagination.innerHTML = '';
+                        return;
+                    }
+
+                    dom.results.innerHTML = items
+                        .map((item, index) => Renderer.card(item, index))
+                        .join('');
+
+                    Renderer.pagination();
+                },
+
+                pagination() {
+                    if (state.page === 1 && state.resultCount === 0) {
+                        dom.pagination.innerHTML = '';
+                        return;
+                    }
+
+                    const start = Math.max(1, state.page - CONFIG.pageLead);
+                    const end = start + CONFIG.pageWindow - 1;
+
+                    let html = '<nav class="pagination" aria-label="Search results pages">';
+                    html += `
+                        <button class="page-btn page-arrow" type="button"
+                            data-page="${state.page - 1}" ${state.page <= 1 ? 'disabled' : ''}
+                            aria-label="Previous page">${ICONS.chevronLeft}<span>Previous</span>
+                        </button>`;
+
+                    for (let pageNumber = start; pageNumber <= end; pageNumber += 1) {
+                        const isCurrent = pageNumber === state.page;
+                        html += `
+                            <button class="page-btn page-number${isCurrent ? ' active' : ''}" type="button"
+                                data-page="${pageNumber}"${isCurrent ? ' aria-current="page"' : ''}
+                                aria-label="Page ${pageNumber}">${pageNumber}
+                            </button>`;
+                    }
+
+                    html += `
+                        <button class="page-btn page-arrow" type="button"
+                            data-page="${state.page + 1}" ${state.resultCount === 0 ? 'disabled' : ''}
+                            aria-label="Next page"><span>Next</span>${ICONS.chevronRight}
+                        </button>`;
+                    html += '</nav>';
+
+                    dom.pagination.innerHTML = html;
+
+                    dom.pagination.querySelectorAll('[data-page]').forEach(button => {
+                        button.addEventListener('click', () => {
+                            const page = Number.parseInt(button.dataset.page, 10);
+                            if (!Number.isFinite(page) || page < 1 || page === state.page) return;
+                            Search.run(state.query, page, true);
+                        });
+                    });
+                },
+
+                error() {
+                    state.resultCount = 0;
+                    dom.results.setAttribute('aria-busy', 'false');
+                    dom.meta.innerHTML = `Search failed for <strong>${Utils.escapeHtml(state.query)}</strong>`;
+                    dom.pagination.innerHTML = '';
+
+                    dom.results.innerHTML = `
+                        <div class="state-card">
+                            <div class="state-icon" aria-hidden="true">${ICONS.alert}</div>
+                            <h2>Something went wrong</h2>
+                            <p>We couldn't reach the search service. Check your connection and try again.</p>
+                            <button class="state-btn" type="button" id="retryBtn">Try again</button>
+                        </div>`;
+
+                    const retryBtn = document.getElementById('retryBtn');
+                    if (retryBtn) {
+                        retryBtn.addEventListener('click', () => Search.run(state.query, state.page, false));
+                    }
+                },
+
+                clear() {
+                    dom.results.innerHTML = '';
+                    dom.results.removeAttribute('aria-busy');
+                    dom.meta.innerHTML = '';
+                    dom.pagination.innerHTML = '';
+                }
+            };
+
+            /* ==============================================================
+               08 · Search controller
+               ============================================================== */
+            const Search = {
+                setLayout(mode) {
+                    document.body.classList.toggle('home-layout', mode === 'home');
+                    document.body.classList.toggle('search-layout', mode === 'search');
+                },
+
+                async run(query, page, updateUrl) {
+                    const normalizedQuery = String(query == null ? '' : query).trim();
+                    if (!normalizedQuery) return;
+
+                    const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
+                    Suggestions.hide();
+
+                    state.query = normalizedQuery;
+                    state.page = safePage;
+
+                    if (updateUrl) {
+                        try {
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('q', normalizedQuery);
+                            url.searchParams.set('page', String(safePage));
+                            window.history.pushState({}, '', url);
+                        } catch (error) { /* file:// or restricted history */ }
+                    }
+
+                    Search.setLayout('search');
+                    window.scrollTo(0, 0);
+                    document.title = `${normalizedQuery} — Metasearch`;
+
+                    // 1. Instant cache check.
+                    const cacheKey = `${normalizedQuery}:${safePage}`;
+                    if (state.cache.has(cacheKey)) {
+                        if (state.searchAbort) {
+                            state.searchAbort.abort();
+                            state.searchAbort = null;
+                        }
+                        state.searchSequence += 1;
+                        Renderer.results(state.cache.get(cacheKey) || []);
+                        return;
+                    }
+
+                    // 2. Skeleton while the request is in flight.
+                    Renderer.skeleton();
+
+                    // 3. Network fetch, aborting any previous request.
+                    if (state.searchAbort) state.searchAbort.abort();
+                    state.searchAbort = new AbortController();
+                    const controller = state.searchAbort;
+                    const sequence = ++state.searchSequence;
+
+                    try {
+                        const response = await fetch(
+                            `${CONFIG.baseUrl}/search?q=${encodeURIComponent(normalizedQuery)}&page=${safePage}`,
+                            { signal: controller.signal }
+                        );
+                        if (!response.ok) throw new Error(`Search request failed (${response.status})`);
+
+                        const data = await response.json();
+                        if (sequence !== state.searchSequence || controller.signal.aborted) return;
+
+                        const results = Array.isArray(data.results) ? data.results : [];
+                        state.cache.set(cacheKey, results);
+                        Renderer.results(results);
+                    } catch (error) {
+                        if (
+                            sequence !== state.searchSequence ||
+                            error.name === 'AbortError' ||
+                            controller.signal.aborted
+                        ) return;
+
+                        Renderer.error();
+                    } finally {
+                        if (state.searchAbort === controller) state.searchAbort = null;
+                    }
+                },
+
+                showHome() {
+                    state.query = '';
+                    state.page = 1;
+                    state.resultCount = 0;
+                    state.searchSequence += 1;
+
+                    if (state.searchAbort) {
+                        state.searchAbort.abort();
+                        state.searchAbort = null;
+                    }
+
+                    Suggestions.hide();
+                    Search.setLayout('home');
+                    Renderer.clear();
+
+                    dom.input.value = '';
+                    dom.clearBtn.hidden = true;
+                    document.title = 'Metasearch — Search across the web';
+                }
+            };
+
+            /* ==============================================================
+               09 · App shell: URL state, shortcuts, boot
+               ============================================================== */
+            const App = {
+                readRoute() {
+                    const params = new URLSearchParams(window.location.search);
+                    return {
+                        query: (params.get('q') || '').trim(),
+                        page: Math.max(1, Number.parseInt(params.get('page'), 10) || 1)
+                    };
+                },
+
+                syncFromUrl() {
+                    const route = App.readRoute();
+
+                    if (!route.query) {
+                        document.title = 'Metasearch — Search across the web';
+                        return;
+                    }
+
+                    dom.input.value = route.query;
+                    dom.clearBtn.hidden = false;
+                    Search.run(route.query, route.page, false);
+                },
+
+                handlePopState() {
+                    const route = App.readRoute();
+
+                    if (!route.query) {
+                        Search.showHome();
+                        return;
+                    }
+
+                    dom.input.value = route.query;
+                    dom.clearBtn.hidden = false;
+                    Search.run(route.query, route.page, false);
+                },
+
+                bindEvents() {
+                    dom.form.addEventListener('submit', event => {
+                        event.preventDefault();
+
+                        const query = dom.input.value.trim();
+                        if (!query) {
+                            dom.input.focus();
+                            return;
+                        }
+
+                        dom.clearBtn.hidden = false;
+                        Search.run(query, 1, true);
+                    });
+
+                    window.addEventListener('popstate', () => App.handlePopState());
+
+                    document.addEventListener('keydown', event => {
+                        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                            event.preventDefault();
+                            dom.input.focus();
+                            dom.input.select();
+                            return;
+                        }
+
+                        if (event.key === '/' && !Utils.isTypingTarget(document.activeElement)) {
+                            event.preventDefault();
+                            dom.input.focus();
+                        }
+                    });
+
+                    if (document.readyState === 'loading') {
+                        window.addEventListener('DOMContentLoaded', () => App.syncFromUrl());
+                    } else {
+                        App.syncFromUrl();
+                    }
+                },
+
+                init() {
+                    Theme.init();
+                    Suggestions.init();
+                    App.bindEvents();
+                }
+            };
+
+            App.init();
+        })();
     </script>
 </body>
 </html>
