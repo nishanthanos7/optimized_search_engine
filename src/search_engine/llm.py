@@ -40,21 +40,6 @@ class NVIDIAProvider:
         self.api_key = api_key
         self.model = model
         self.base_url = base_url.rstrip("/")
-        self._client: httpx.AsyncClient | None = None
-
-    @property
-    def client(self) -> httpx.AsyncClient:
-        if self._client is None:
-            self._client = httpx.AsyncClient(
-                base_url=self.base_url,
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json",
-                    "Accept": "text/event-stream",
-                },
-                timeout=httpx.Timeout(45.0),
-            )
-        return self._client
 
     async def stream(self, prompt: str):
         payload = {
@@ -68,42 +53,48 @@ class NVIDIAProvider:
             "stream": True,
         }
         try:
-            async with self.client.stream(
-                "POST", "/chat/completions", json=payload
-            ) as response:
-                if response.status_code != 200:
-                    body = await response.aread()
-                    logger.error(
-                        "NVIDIA API error %s: %s",
-                        response.status_code,
-                        body.decode(errors="replace")[:300],
-                    )
-                    return
-                async for line in response.aiter_lines():
-                    if not line or not line.startswith("data:"):
-                        continue
-                    data = line[len("data:"):].strip()
-                    if data == "[DONE]":
-                        break
-                    try:
-                        chunk = json.loads(data)
-                    except json.JSONDecodeError:
-                        continue
-                    choices = chunk.get("choices", [])
-                    if not choices:
-                        continue
-                    delta = choices[0].get("delta", {})
-                    content = delta.get("content")
-                    if content:
-                        yield content
+            async with httpx.AsyncClient(timeout=httpx.Timeout(45.0)) as client:
+                async with client.stream(
+                    "POST",
+                    f"{self.base_url}/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json",
+                        "Accept": "text/event-stream",
+                    },
+                    json=payload,
+                ) as response:
+                    if response.status_code != 200:
+                        body = await response.aread()
+                        logger.error(
+                            "NVIDIA API error %s: %s",
+                            response.status_code,
+                            body.decode(errors="replace")[:300],
+                        )
+                        return
+                    async for line in response.aiter_lines():
+                        if not line or not line.startswith("data:"):
+                            continue
+                        data = line[len("data:"):].strip()
+                        if data == "[DONE]":
+                            break
+                        try:
+                            chunk = json.loads(data)
+                        except json.JSONDecodeError:
+                            continue
+                        choices = chunk.get("choices", [])
+                        if not choices:
+                            continue
+                        delta = choices[0].get("delta", {})
+                        content = delta.get("content")
+                        if content:
+                            yield content
         except Exception:
             logger.exception("NVIDIA stream failed")
             return
 
     async def aclose(self):
-        if self._client is not None:
-            await self._client.aclose()
-            self._client = None
+        pass  # No persistent client to close
 
 
 # ---------------------------------------------------------------------------
@@ -135,6 +126,4 @@ def is_available() -> bool:
 
 async def close_provider():
     global _provider
-    if _provider is not None:
-        await _provider.aclose()
     _provider = None

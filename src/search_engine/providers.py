@@ -72,6 +72,19 @@ async def get_suggestions(query: str, client: httpx.AsyncClient) -> list:
     return []
 
 
+# Domains to exclude from search results (low quality, spam, etc.)
+BLOCKED_DOMAINS = {"grokipedia.com", "www.grokipedia.com"}
+
+
+def _is_blocked(url: str) -> bool:
+    try:
+        from urllib.parse import urlparse
+        domain = urlparse(url).netloc.lower().replace("www.", "")
+        return domain in BLOCKED_DOMAINS
+    except Exception:
+        return False
+
+
 async def search_metasearch(query: str, page: int = 1) -> list[dict]:
     async def search_backend(backend: str) -> list[dict]:
         try:
@@ -85,16 +98,36 @@ async def search_metasearch(query: str, page: int = 1) -> list[dict]:
         except Exception:
             return []
 
-        return [
-            {
-                "title": item.get("title", ""),
-                "url": item.get("href", ""),
-                "snippet": item.get("body", ""),
-                "engines": ["DuckDuckGo" if backend == "duckduckgo" else "Bing"],
-            }
-            for item in search_results
-            if item.get("href", "").startswith("http")
-        ]
+        results = []
+        seen_urls = set()
+        for item in search_results:
+            url = item.get("href", "").strip()
+            title = item.get("title", "").strip()
+            snippet = item.get("body", "").strip()
+            if not url or not url.startswith("http"):
+                continue
+            if _is_blocked(url):
+                continue
+            if url in seen_urls:
+                continue
+            seen_urls.add(url)
+            # Clean title - remove site name suffixes
+            clean_title = title
+            for suffix in [" - Wikipedia", " - Bing", " - DuckDuckGo", " | Wikipedia"]:
+                if clean_title.endswith(suffix):
+                    clean_title = clean_title[: -len(suffix)].strip()
+            # Truncate very long titles
+            if len(clean_title) > 100:
+                clean_title = clean_title[:97] + "..."
+            results.append(
+                {
+                    "title": clean_title,
+                    "url": url,
+                    "snippet": snippet[:300],
+                    "engines": ["DuckDuckGo" if backend == "duckduckgo" else "Bing"],
+                }
+            )
+        return results
 
     # Run both backends in parallel (multi-agent).
     provider_results = await asyncio.gather(
@@ -119,13 +152,13 @@ async def search_metasearch(query: str, page: int = 1) -> list[dict]:
 
     return [
         {
-            "title": item.get("title", ""),
-            "url": item.get("href", ""),
-            "snippet": item.get("body", ""),
+            "title": item.get("title", "").strip()[:100],
+            "url": item.get("href", "").strip(),
+            "snippet": item.get("body", "").strip()[:300],
             "engines": ["DDGS metasearch"],
         }
         for item in search_results
-        if item.get("href", "").startswith("http")
+        if item.get("href", "").startswith("http") and not _is_blocked(item.get("href", "").strip())
     ]
 
 
@@ -161,3 +194,66 @@ async def search_wikipedia(
     except Exception:
         pass
     return []
+
+# ---------------------------------------------------------------------------
+# Wikipedia Knowledge Panel API helpers
+# ---------------------------------------------------------------------------
+async def wiki_search(query: str, client: httpx.AsyncClient) -> dict | None:
+    """Search Wikipedia and return the first result."""
+    try:
+        response = await client.get(
+            "https://en.wikipedia.org/w/api.php",
+            params={
+                "action": "query",
+                "list": "search",
+                "srsearch": query,
+                "srlimit": 5,
+                "format": "json",
+            },
+            headers={"User-Agent": "FastMetasearch/1.0"},
+            timeout=3.0,
+        )
+        if response.status_code != 200:
+            return None
+        data = response.json()
+        items = data.get("query", {}).get("search", [])
+        if not items:
+            return None
+        return items[0]
+    except Exception:
+        return None
+
+
+async def wiki_page(title: str, client: httpx.AsyncClient) -> dict | None:
+    """Get Wikipedia page details including extract and image."""
+    try:
+        response = await client.get(
+            "https://en.wikipedia.org/w/api.php",
+            params={
+                "action": "query",
+                "prop": "extracts|pageimages",
+                "exintro": 1,
+                "explaintext": 1,
+                "exlimit": 1,
+                "titles": title,
+                "format": "json",
+                "pithumbsize": 200,
+            },
+            headers={"User-Agent": "FastMetasearch/1.0"},
+            timeout=3.0,
+        )
+        if response.status_code != 200:
+            return None
+        data = response.json()
+        pages = data.get("query", {}).get("pages", {})
+        if not pages:
+            return None
+        page = list(pages.values())[0]
+        return {
+            "title": page.get("title", ""),
+            "extract": page.get("extract", ""),
+            "image": page.get("thumbnail", {}).get("source", ""),
+            "pageid": page.get("pageid", ""),
+        }
+    except Exception:
+        return None

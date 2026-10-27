@@ -1,16 +1,15 @@
-"""AI Mode search — fast, grounded answers from 3-5 sources.
+"""AI Mode search — fast, grounded answers from search snippets.
 
-Multi-agent architecture:
-- Agent 1: Search snippets → optimistic instant answer
-- Agent 2: Parallel page fetch (3-5 sources) + NVIDIA LLM → upgraded answer
-- Agent 3: Cache → repeat queries instant
+Multi-agent architecture (real-world RAG pattern):
+- Agent 1: Search snippets -> instant LLM context (no page fetch blocking)
+- Agent 2: NVIDIA Nemotron LLM streams grounded answer
+- Agent 3: Cache -> repeat queries are instant (~0.02s)
 
 Speed tricks:
-- 3-5 pages fetched in parallel (asyncio.gather)
-- Short timeouts (1.2s per page)
-- Minimal content per page (500 chars)
-- LLM max_tokens=400 for fast generation
-- Optimistic UI: snippets stream immediately, LLM upgrades in background
+- Search snippets used directly as LLM context (skip page fetch = saves 2-3s)
+- Stream LLM answer immediately (no fallback replacement that flickers)
+- Aggressive caching (15 min TTL, 200 entries)
+- Short LLM tokens (400) for fast generation
 """
 
 import asyncio
@@ -50,7 +49,7 @@ def _cache_set(key: str, answer: str, sources: list):
 
 
 # ---------------------------------------------------------------------------
-# HTML → text
+# HTML -> text (for page fetch fallback)
 # ---------------------------------------------------------------------------
 def clean_html_to_text(html: str) -> str:
     soup = BeautifulSoup(html, "html.parser")
@@ -71,11 +70,11 @@ def clean_html_to_text(html: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Page fetching — parallel, fast, minimal
+# Page fetching (background only, for richer context if needed)
 # ---------------------------------------------------------------------------
 async def fetch_page_text(client, url: str, max_chars: int = 500) -> str:
     try:
-        response = await client.get(url, timeout=1.2)
+        response = await client.get(url, timeout=1.5)
         if response.status_code != 200:
             return ""
         content_type = response.headers.get("content-type", "")
@@ -90,8 +89,8 @@ async def fetch_page_text(client, url: str, max_chars: int = 500) -> str:
         return ""
 
 
-async def gather_page_contents(client, results: list[dict], max_pages: int = 5):
-    """Fetch 3-5 pages in parallel. Returns list of source dicts."""
+async def gather_page_contents(client, results: list[dict], max_pages: int = 3):
+    """Fetch content for top pages in parallel (background enrichment)."""
     sources = []
     seen_domains = set()
 
@@ -118,8 +117,7 @@ async def gather_page_contents(client, results: list[dict], max_pages: int = 5):
             "content": text,
         }
 
-    # Fetch up to max_pages*2 candidates in parallel.
-    tasks = [_fetch_one(item) for item in results[: max_pages * 2]]
+    tasks = [_fetch_one(item) for item in results[:max_pages * 2]]
     fetched = await asyncio.gather(*tasks)
 
     for src in fetched:
@@ -130,50 +128,48 @@ async def gather_page_contents(client, results: list[dict], max_pages: int = 5):
 
 
 # ---------------------------------------------------------------------------
-# Prompt building (compact)
+# Prompt building (compact, snippet-grounded)
 # ---------------------------------------------------------------------------
 def build_grounded_prompt(query: str, sources: list[dict]) -> str:
-    lines = [f"Q: {query}\n", "Sources:\n"]
+    lines = [f"Question: {query}\n", "Sources (use THESE to answer, cite [n]):\n"]
     for idx, src in enumerate(sources, start=1):
         lines.append(
             f"[{idx}] {src['title']} | {src['url']}\n"
             f"    {src['content']}\n"
         )
     lines.append(
-        "\nAnswer briefly using ONLY sources above. Cite [n]. "
-        "End with short Sources list."
+        "\nAnswer briefly and accurately using ONLY the sources above. "
+        "Cite sources inline with [n]. End with a short Sources list. "
+        "Do not invent facts."
     )
     return "\n".join(lines)
 
 
-def build_fallback_answer(query: str, results: list[dict]) -> str:
-    """Build answer from search SNIPPETS (no page fetch — instant)."""
-    if not results:
-        return "I couldn't find any search results for your query."
-    lines = [f"Based on results for “{query}”:\n"]
+def build_snippet_sources(results: list[dict]) -> list[dict]:
+    """Convert search results into source dicts using snippets (instant, no fetch)."""
+    sources = []
     for idx, item in enumerate(results[:5], start=1):
-        snippet = item.get("snippet", "").strip()[:200]
-        if len(item.get("snippet", "")) > 200:
-            snippet += "…"
-        lines.append(
-            f"[{idx}] {item.get('title','')} ({item.get('url','')}): {snippet}"
-        )
-    if provider_name() != "none":
-        lines.append(
-            f"\nUpgrading to AI-generated answer via {provider_name()}…"
-        )
-    return "\n".join(lines)
+        snippet = item.get("snippet", "").strip()[:300]
+        sources.append({
+            "title": item.get("title", "") or item.get("url", ""),
+            "url": item.get("url", ""),
+            "domain": item.get("domain", "") or "",
+            "content": snippet,
+        })
+    return sources
 
 
 # ---------------------------------------------------------------------------
-# Main stream — optimistic multi-agent
+# Main stream — optimistic LLM streaming
 # ---------------------------------------------------------------------------
 async def stream_ai_answer(query: str, client):
-    """Stream a grounded answer.
+    """Stream a grounded answer from NVIDIA Nemotron.
 
-    Agent 1: Search snippets → optimistic answer (streams immediately)
-    Agent 2: Parallel page fetch (3-5) + NVIDIA LLM → upgraded answer
-    Cache: repeat queries are instant
+    Strategy:
+    1. Cache hit -> instant stream (0.02s)
+    2. Cache miss -> search snippets -> build prompt -> stream LLM immediately
+    3. No fallback replacement (no __reset__ flicker)
+    4. If LLM fails, fall back to snippet summary
     """
     cache_key = query.lower().strip()
 
@@ -188,61 +184,59 @@ async def stream_ai_answer(query: str, client):
         return
 
     # --- Slow path ---
-    # Agent 1: Search (get snippets immediately).
+    # 1. Search results (get snippets immediately).
     results = await search_metasearch(query, page=1)
     if not results:
         yield "I couldn't find any search results for your query."
         return
 
-    # Agent 1: Optimistic answer from snippets — NO page fetch, streams instantly.
-    fallback = build_fallback_answer(query, results)
-    llm_ok = get_provider() is not None
+    # 2. Build sources from snippets (instant, no page fetch blocking LLM).
+    sources = build_snippet_sources(results)
 
-    final_answer_parts = []
-    sources_for_cache = []
-    upgraded = False
+    # 3. Try LLM provider (stream directly, no fallback replacement).
+    provider = get_provider()
+    llm_ok = provider is not None
 
-    # Agent 2: Background task — fetch pages in parallel + LLM.
-    async def _llm_task():
-        nonlocal upgraded
-        sources = await gather_page_contents(client, results, max_pages=5)
-        if not sources:
-            return None, []
-        try:
-            prompt = build_grounded_prompt(query, sources)
-            parts = []
-            async for chunk in get_provider().stream(prompt):
-                parts.append(chunk)
-            final = "".join(parts)
-            upgraded = True
-            return final, sources
-        except Exception:
-            logger.exception("LLM background error")
-            return None, sources
+    if llm_ok:
+        # Retry LLM up to 3 times — transient API failures shouldn't break AI Mode.
+        for attempt in range(3):
+            try:
+                prompt = build_grounded_prompt(query, sources)
+                answer_parts = []
+                async for chunk in provider.stream(prompt):
+                    answer_parts.append(chunk)
+                    yield chunk
+                final_answer = "".join(answer_parts).strip()
+                # If LLM returned any content, use it. Only fall back if truly empty.
+                if final_answer:
+                    _cache_set(cache_key, final_answer, sources)
+                    yield {"__sources__": sources}
+                    return
+                logger.warning(f"LLM returned empty answer (attempt {attempt + 1}/3)")
+            except Exception:
+                logger.exception(f"NVIDIA stream error (attempt {attempt + 1}/3)")
+                await asyncio.sleep(1)
 
-    llm_task = asyncio.create_task(_llm_task())
-
-    # Stream optimistic fallback answer immediately.
+    # 4. Fallback: snippet-based summary (no LLM).
+    fallback = build_fallback_answer(query, sources)
     for i in range(0, len(fallback), 40):
         yield fallback[i : i + 40]
         await asyncio.sleep(0)
+    _cache_set(cache_key, fallback, sources)
+    yield {"__sources__": sources}
 
-    # Wait for LLM upgrade. If it completes, stream the LLM answer.
-    llm_answer, sources = await llm_task
-    sources_for_cache = sources
 
-    if upgraded and llm_answer:
-        # Signal frontend to reset before streaming LLM upgrade.
-        yield {"__reset__": True}
-        for i in range(0, len(llm_answer), 40):
-            yield llm_answer[i : i + 40]
-            await asyncio.sleep(0)
-        final_answer = llm_answer
-    else:
-        final_answer = fallback
-
-    # Cache for instant repeat.
-    _cache_set(cache_key, final_answer, sources_for_cache)
-
-    # Attach sources.
-    yield {"__sources__": sources_for_cache}
+def build_fallback_answer(query: str, sources: list[dict]) -> str:
+    if not sources:
+        return "I couldn't find any search results for your query."
+    lines = [f"Based on results for “{query}”:\n"]
+    for idx, src in enumerate(sources, start=1):
+        content = src.get("content", "").strip()[:250]
+        if len(src.get("content", "")) > 250:
+            content += "…"
+        lines.append(f"[{idx}] {src['title']} ({src['domain']}): {content}")
+    lines.append(
+        f"\nNote: LLM ({provider_name()}) unavailable — showing raw excerpts. "
+        "Configure NVIDIA_API_KEY for AI-generated answers."
+    )
+    return "\n".join(lines)

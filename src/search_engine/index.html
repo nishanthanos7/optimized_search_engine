@@ -534,6 +534,24 @@
             gap: 9px;
         }
 
+        /* Results Grid - Two Column Layout with Knowledge Panel */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .results-column {
+            min-width: 0;
+        }
+
+        .knowledge-panel {
+            position: sticky;
+            top: 20px;
+            z-index: 10;
+        }
+
         .spinner {
             display: inline-block;
             width: 14px;
@@ -544,71 +562,66 @@
             animation: spin 0.65s linear infinite;
         }
 
-        .result-item {
+                .result-item {
             position: relative;
-            padding: 18px 20px;
-            margin: 0 -20px 10px;
-            border-radius: 12px;
+            padding: 24px;
+            margin: 0 -24px 24px;
+            border-radius: 18px;
             border: 1px solid var(--border);
             background: var(--surface);
             animation: fadeUp 0.3s ease both;
-            animation-delay: calc(var(--i, 0) * 25ms);
-            transition: all 0.15s ease;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            animation-delay: calc(var(--i, 0) * 20ms);
+            transition: all 0.2s ease;
+            display: grid;
+            grid-template-columns: 90px 1fr;
+            gap: 24px;
+            align-items: start;
             min-height: 150px;
         }
 
         .result-item:hover {
             border-color: var(--accent);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px -4px rgba(0,0,0,0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px -6px rgba(0,0,0,0.15);
         }
 
         .result-head {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 10px;
             min-width: 0;
-            margin-bottom: 7px;
+            margin-bottom: 6px;
+            grid-column: 2;
+            grid-row: 1;
         }
 
         .favicon {
             position: relative;
-            display: grid;
-            flex: 0 0 auto;
-            place-items: center;
-            width: 28px;
-            height: 28px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             overflow: hidden;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent);
             background: var(--surface-2);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            flex-shrink: 0;
+            grid-column: 1;
+            grid-row: 1 / 3;
         }
 
         .favicon img {
-            position: absolute;
-            inset: 0;
             width: 100%;
             height: 100%;
-            padding: 5px;
-            object-fit: contain;
-            background: var(--surface);
-            opacity: 0;
-            transition: opacity 0.2s ease;
+            object-fit: cover;
         }
 
         .result-source {
             display: flex;
-            flex: 0 1 auto;
             align-items: baseline;
             gap: 6px;
             min-width: 0;
             overflow: hidden;
+            grid-column: 2;
+            grid-row: 2;
         }
 
         .result-domain {
@@ -632,11 +645,12 @@
 
         .result-tags {
             display: flex;
-            flex: 0 0 auto;
             flex-wrap: wrap;
             gap: 5px;
             justify-content: flex-end;
             margin-left: auto;
+            grid-column: 2;
+            grid-row: 3;
         }
 
         .engines-tag {
@@ -925,7 +939,7 @@
             pointer-events: none;
         }
 
-        /* Answer body */
+        /* 3. Text Paragraph Block - Answer with citations */
         .ai-mode-answer {
             padding: 20px 24px 8px;
             color: var(--text);
@@ -934,6 +948,14 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             background: var(--surface);
             min-height: 80px;
+            max-height: 280px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ai-mode-answer.expanded {
+            max-height: none;
+            overflow: visible;
         }
 
         .ai-mode-answer p { margin: 0 0 16px; }
@@ -979,6 +1001,34 @@
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
+        }
+
+        /* AI Mode answer toggle bar */
+        .ai-mode-answer-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 24px;
+            border-top: 1px solid var(--border);
+            background: var(--surface-2);
+        }
+
+        .ai-mode-answer-toggle {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .ai-mode-answer-toggle:hover {
+            color: var(--text);
+        }
+
+        .ai-mode-answer-toggle svg {
+            width: 14px;
+            height: 14px;
+            margin-left: 6px;
         }
 
         /* Sources toggle bar */
@@ -1107,7 +1157,7 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ---------- Animated borders (Google style) ---------- */
+        /* ---------- Animated borders (colorful shining) ---------- */
         .border-animate {
             position: relative;
         }
@@ -1121,9 +1171,13 @@
             background: linear-gradient(
                 90deg,
                 transparent 0%,
-                var(--accent) 50%,
+                #ff006e 20%,
+                #8338ec 40%,
+                #3a86ff 60%,
+                #ffbe0b 80%,
                 transparent 100%
             );
+            background-size: 300% 300%;
             -webkit-mask: 
                 linear-gradient(#fff 0 0) content-box,
                 linear-gradient(#fff 0 0) padding-box;
@@ -1138,11 +1192,154 @@
         }
 
         @keyframes borderShimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            0% { transform: translateX(-100%) translateY(-100%); background-position: 0% 0%; }
+            50% { transform: translateX(100%) translateY(100%); background-position: 100% 100%; }
+            100% { transform: translateX(-100%) translateY(-100%); background-position: 0% 0%; }
+        }
+
+        /* ---------- Knowledge Panel ---------- */
+        .knowledge-panel {
+            margin-bottom: 20px;
+            animation: aiSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .knowledge-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 1px 3px 0 var(--shadow), 0 1px 2px -1px var(--shadow);
+            max-width: 340px;
+        }
+
+        .knowledge-header {
+            gap: 4px;
+        }
+
+        .knowledge-card img {
+            border-width: 3px;
+        }
+
+        .knowledge-card h2 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 0.25rem;
+        }
+
+        .knowledge-card h2,
+        .knowledge-card .text-xl {
+            color: var(--text);
+        }
+
+        .knowledge-card p {
+            color: var(--text-muted);
+        }
+
+        .knowledge-card .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .knowledge-card .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .knowledge-card .mb-3 {
+            margin-bottom: 0.75rem;
+        }
+
+        .knowledge-card .mt-1 {
+            margin-top: 0.25rem;
+        }
+
+        .knowledge-card .mt-3 {
+            margin-top: 0.75rem;
+        }
+
+        .knowledge-card .px-6 {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        .knowledge-card .py-4 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .knowledge-card .pb-4 {
+            padding-bottom: 1rem;
+        }
+
+        .knowledge-card .flex-1 {
+            flex: 1 1 0%;
+        }
+
+        .knowledge-card .min-w-0 {
+            min-width: 0;
+        }
+
+        .knowledge-card .flex-shrink-0 {
+            flex-shrink: 0;
+        }
+
+        .knowledge-card .space-y-2 > * + * {
+            margin-top: 0.5rem;
+        }
+
+        /* Knowledge Panel Table Styles */
+        .knowledge-panel table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .knowledge-panel table td {
+            border-bottom: 1px solid var(--border);
+            padding: 6px 8px;
+        }
+
+        .knowledge-panel .knowledge-card p {
+            color: var(--text-muted);
+        }
+
+        .knowledge-card h2 {
+            color: var(--text);
+        }
+
+        /* Knowledge table */
+        .knowledge-panel table td:first-child {
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.05em;
+        }
+
+        /* Knowledge Panel Read More */
+        .knowledge-panel a {
+            color: var(--link);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .knowledge-panel a:hover {
+            text-decoration: underline;
         }
 
         /* shadcn-like card */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .card-sm { border-radius: var(--radius-sm); }
+        .card-lg { border-radius: var(--radius-lg); }
+
+        .hidden {
+            display: none !important;
+        }
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -1492,13 +1689,55 @@
                     </div>
                 </div>
                 <div id="aiModeAnswer" class="ai-mode-answer"></div>
+                <div id="aiModeAnswerBar" class="ai-mode-answer-bar hidden">
+                    <button id="aiModeAnswerToggle" class="ai-mode-answer-toggle" onclick="AiMode.toggleAnswerExpand()">
+                        Show more <svg class="ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                </div>
                 <div id="aiModeSources" class="ai-mode-sources"></div>
                 <div id="aiModeError" class="ai-mode-error"></div>
             </div>
         </section>
 
-        <div id="resultsContainer" class="results"></div>
-        <div id="paginationContainer"></div>
+        <!-- Results + Knowledge Panel Layout -->
+        <div class="results-grid">
+            <div class="results-column">
+                <div id="resultsContainer" class="results"></div>
+                <div id="paginationContainer"></div>
+            </div>
+
+            <!-- Wikipedia Knowledge Panel (Right Column) -->
+            <section id="knowledgePanel" class="knowledge-panel hidden" aria-label="Knowledge panel">
+                <div class="knowledge-card border-animate">
+                    <div class="knowledge-header flex items-start gap-4 px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                        <div class="flex-shrink-0">
+                            <img id="knowledgeImage" class="w-32 h-32 rounded-full border-4 border-slate-200 dark:border-slate-700 shadow-md object-cover" src="" alt="" style="display:none;">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h2 id="knowledgeTitle" class="text-xl font-bold text-slate-900 dark:text-slate-100 leading-tight"></h2>
+                            <p id="knowledgeSubtitle" class="text-sm text-slate-500 dark:text-slate-400 mt-1"></p>
+                            <div id="knowledgeBadges" class="flex gap-2 mt-3"></div>
+                        </div>
+                        <button onclick="Knowledge.clear()" class="text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors" aria-label="Close knowledge panel">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 6 6 18"/>
+                                <path d="M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="knowledgeContent" class="px-6 py-4 text-slate-700 dark:text-slate-200 text-sm leading-relaxed"></div>
+                    <div id="knowledgeFacts" class="px-6 pb-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Quick Facts</h3>
+                        <div id="knowledgeFactsList" class="space-y-2"></div>
+                    </div>
+                    <div class="px-6 py-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                        <a href="#" id="knowledgeReadMore" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline" target="_blank" rel="noopener noreferrer">
+                            Read more on Wikipedia →
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
     </main>
 
     <!-- App script: one IIFE, split into modules -->
@@ -1535,6 +1774,8 @@
                 themeColor: document.getElementById('themeColor'),
                 aiModePanel: document.getElementById('aiModePanel'),
                 aiModeAnswer: document.getElementById('aiModeAnswer'),
+                aiModeAnswerBar: document.getElementById('aiModeAnswerBar'),
+                aiModeAnswerToggle: document.getElementById('aiModeAnswerToggle'),
                 aiModeThinking: document.getElementById('aiModeThinking'),
                 aiModeThinkingMarquee: document.getElementById('thinkingMarquee'),
                 aiModeToggleText: document.getElementById('aiModeToggleText'),
@@ -1542,6 +1783,14 @@
                 aiModeSourcesToggle: document.getElementById('aiModeSourcesToggle'),
                 aiModeError: document.getElementById('aiModeError'),
                 aiModeQuery: document.getElementById('aiModeQuery'),
+                knowledgePanel: document.getElementById('knowledgePanel'),
+                knowledgeTitle: document.getElementById('knowledgeTitle'),
+                knowledgeSubtitle: document.getElementById('knowledgeSubtitle'),
+                knowledgeImage: document.getElementById('knowledgeImage'),
+                knowledgeContent: document.getElementById('knowledgeContent'),
+                knowledgeBadges: document.getElementById('knowledgeBadges'),
+                knowledgeFactsList: document.getElementById('knowledgeFactsList'),
+                knowledgeReadMore: document.getElementById('knowledgeReadMore'),
             };
 
             /* ==============================================================
@@ -2185,6 +2434,15 @@
                     const html = this.renderCitations(this.linkify(this.renderMarkdown(text)), sources);
                     dom.aiModeAnswer.innerHTML = html;
 
+                    // Show/hide answer toggle bar based on content length
+                    if (text.length > 200) {
+                        dom.aiModeAnswerBar.classList.remove('hidden');
+                        dom.aiModeAnswer.classList.remove('expanded');
+                        dom.aiModeAnswerToggle.innerHTML = 'Show more <svg class="ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>';
+                    } else {
+                        dom.aiModeAnswerBar.classList.add('hidden');
+                    }
+
                     this.renderSources(sources);
                     dom.aiModePanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 },
@@ -2228,6 +2486,17 @@
                     dom.aiModeSources.classList.add('open');
                 },
 
+                toggleAnswerExpand() {
+                    const isExpanded = dom.aiModeAnswer.classList.contains('expanded');
+                    dom.aiModeAnswer.classList.toggle('expanded');
+                    const btn = dom.aiModeAnswerToggle;
+                    if (isExpanded) {
+                        btn.innerHTML = '<span>Show more</svg><svg class="ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>';
+                    } else {
+                        btn.innerHTML = '<span>Show less</svg><svg class="ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15l7-7 7 7"/></svg>';
+                    }
+                },
+
                 toggleSources(event) {
                     if (event) event.stopPropagation();
                     dom.aiModeSources.classList.toggle('open');
@@ -2269,6 +2538,7 @@
                     dom.aiModeSources.innerHTML = '';
                     dom.aiModeSources.classList.remove('open');
                     dom.aiModeError.style.display = 'none';
+                    Knowledge.clear();
                 },
 
                 async fetchAndRender(query) {
@@ -2357,16 +2627,6 @@
 
                                 try {
                                     const parsed = JSON.parse(line);
-                                    if (parsed.type === 'reset') {
-                                        // LLM upgrade: clear optimistic answer and start fresh.
-                                        answer = '';
-                                        displayText = '';
-                                        words = [];
-                                        wordIndex = 0;
-                                        flushTyping();
-                                        dom.aiModeAnswer.innerHTML = '';
-                                        continue;
-                                    }
                                     if (parsed.type === 'text') {
                                         answer += parsed.content;
                                         typeWriter(parsed.content);
@@ -2415,7 +2675,10 @@
 
                 async run(query, page, updateUrl) {
                     const normalizedQuery = String(query == null ? '' : query).trim();
-                    if (!normalizedQuery) return;
+                    if (!normalizedQuery) {
+                        Knowledge.clear();
+                        return;
+                    }
 
                     const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
                     Suggestions.hide();
@@ -2445,7 +2708,10 @@
                         }
                         state.searchSequence += 1;
                         Renderer.results(state.cache.get(cacheKey) || []);
-                        if (safePage === 1) AiMode.fetchAndRender(normalizedQuery);
+                        if (safePage === 1) {
+                            AiMode.fetchAndRender(normalizedQuery);
+                            Knowledge.fetchAndRender(normalizedQuery);
+                        }
                         return;
                     }
 
@@ -2471,7 +2737,14 @@
                         const results = Array.isArray(data.results) ? data.results : [];
                         state.cache.set(cacheKey, results);
                         Renderer.results(results);
-                        if (safePage === 1) AiMode.fetchAndRender(normalizedQuery);
+                        if (safePage === 1) {
+                            AiMode.fetchAndRender(normalizedQuery);
+                            if (results.length === 0) {
+                                Knowledge.clear();
+                            } else {
+                                Knowledge.fetchAndRender(normalizedQuery);
+                            }
+                        }
                     } catch (error) {
                         if (
                             sequence !== state.searchSequence ||
@@ -2500,10 +2773,133 @@
                     Search.setLayout('home');
                     Renderer.clear();
                     AiMode.clear();
+                    Knowledge.clear();
 
                     dom.input.value = '';
                     dom.clearBtn.hidden = true;
                     document.title = 'Metasearch — Search across the web';
+                }
+            };
+
+            /* ==============================================================
+               Knowledge Panel module (Wikipedia)
+               ============================================================== */
+            const Knowledge = {
+                cache: new Map(),
+
+                async fetchAndRender(query) {
+                    dom.knowledgePanel.classList.add('hidden');
+                    const cacheKey = query.toLowerCase().trim();
+                    if (this.cache.has(cacheKey)) {
+                        this.render(this.cache.get(cacheKey));
+                        return;
+                    }
+
+                    try {
+                        const data = await this.searchWikipedia(query);
+                        if (data && data.title) {
+                            // Only show knowledge panel for strong matches
+                            // Exact match or query is contained in title or vice versa
+                            const q = query.toLowerCase().trim();
+                            const t = data.title.toLowerCase().trim();
+                            const isExactMatch = q === t;
+                            const isQueryInTitle = t.includes(q) && q.length > 2;
+                            const isTitleInQuery = q.includes(t) && t.length > 2;
+
+                            if (!isExactMatch && !isQueryInTitle && !isTitleInQuery) {
+                                dom.knowledgePanel.classList.add('hidden');
+                                return;
+                            }
+
+                            this.cache.set(cacheKey, data);
+                            this.render(data);
+                        } else {
+                            dom.knowledgePanel.classList.add('hidden');
+                        }
+                    } catch (error) {
+                        dom.knowledgePanel.classList.add('hidden');
+                    }
+                },
+
+                async searchWikipedia(query) {
+                    // First, search for the page
+                    const searchUrl = `${CONFIG.baseUrl}/api/wiki/search?q=${encodeURIComponent(query)}`;
+                    const searchResponse = await fetch(searchUrl);
+                    if (!searchResponse.ok) return null;
+                    const searchData = await searchResponse.json();
+
+                    if (!searchData.results || searchData.results.length === 0) return null;
+
+                    const page = searchData.results[0];
+                    const pageTitle = page.title;
+
+                    // Get page details (extract + image)
+                    const pageUrl = `${CONFIG.baseUrl}/api/wiki/page?title=${encodeURIComponent(pageTitle)}`;
+                    const pageResponse = await fetch(pageUrl);
+                    if (!pageResponse.ok) return null;
+                    const pageData = await pageResponse.json();
+
+                    return {
+                        title: page.title || pageTitle,
+                        extract: page.extract || '',
+                        image: page.image || '',
+                        pageUrl: `https://en.wikipedia.org/wiki/${encodeURIComponent(page.title || pageTitle.replace(/ /g, '_'))}`,
+                        ...pageData,
+                    };
+                },
+
+                render(data) {
+                    dom.knowledgeTitle.textContent = data.title || '';
+                    dom.knowledgeSubtitle.textContent = data.extract ? data.extract.substring(0, 120) : '';
+                    dom.knowledgeReadMore.href = data.pageUrl || '#';
+
+                    if (data.image) {
+                        dom.knowledgeImage.src = data.image;
+                        dom.knowledgeImage.style.display = 'block';
+                    } else {
+                        dom.knowledgeImage.style.display = 'none';
+                    }
+
+                    dom.knowledgeContent.innerHTML = data.extract ? `<p>${data.extract}</p>` : '';
+                    dom.knowledgeFactsList.innerHTML = '';
+
+                    // Build facts table rows from extract
+                    const facts = [];
+                    if (data.extract) {
+                        const sentences = data.extract.split('. ').filter(s => s.trim().length > 0);
+                        sentences.slice(0, 5).forEach((s, i) => {
+                            facts.push([`Fact ${i + 1}`, s.trim().endsWith('.') ? s.trim() : s.trim() + '.']);
+                        });
+                    }
+
+                    // Build facts HTML table
+                    const factsHtml = facts.map(f => `
+                        <tr>
+                            <td class="px-4 py-2 border-b border-slate-200 dark:border-slate-700 font-medium text-slate-600 dark:text-slate-300 w-1/4">${f[0]}</td>
+                            <td class="px-4 py-2 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">${f[1]}</td>
+                        </tr>
+                    `).join('');
+
+                    dom.knowledgeFactsList.innerHTML = factsHtml;
+
+                    // Add badges
+                    dom.knowledgeBadges.innerHTML = `
+                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">Wikipedia</span>
+                    `;
+
+                    dom.knowledgePanel.classList.remove('hidden');
+                },
+
+                clear() {
+                    dom.knowledgePanel.classList.add('hidden');
+                    dom.knowledgeTitle.textContent = '';
+                    dom.knowledgeSubtitle.textContent = '';
+                    dom.knowledgeImage.src = '';
+                    dom.knowledgeImage.style.display = 'none';
+                    dom.knowledgeContent.innerHTML = '';
+                    dom.knowledgeBadges.innerHTML = '';
+                    dom.knowledgeFactsList.innerHTML = '';
+                    dom.knowledgeReadMore.href = '#';
                 }
             };
 

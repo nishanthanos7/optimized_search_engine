@@ -15,6 +15,8 @@ from .providers import (
     rank_results,
     search_metasearch,
     search_wikipedia,
+    wiki_page,
+    wiki_search,
 )
 
 router = APIRouter()
@@ -101,6 +103,26 @@ async def search(
     return {"query": q, "page": page, "results": final_results}
 
 
+@router.get("/api/wiki/search")
+async def wiki_search_endpoint(request: Request, q: str = Query(...)):
+    """Search Wikipedia for a page matching the query."""
+    client = request.app.state.http_client
+    result = await wiki_search(q, client)
+    if not result:
+        return {"results": []}
+    return {"results": [result]}
+
+
+@router.get("/api/wiki/page")
+async def wiki_page_endpoint(request: Request, title: str = Query(...)):
+    """Get Wikipedia page details including extract and image."""
+    client = request.app.state.http_client
+    result = await wiki_page(title, client)
+    if not result:
+        return {}
+    return result
+
+
 @router.post("/api/ai-answer")
 async def ai_answer(request: Request, payload: AiAnswerRequest):
     """AI Mode: fetch search pages and stream a grounded Gemini answer."""
@@ -117,9 +139,6 @@ async def ai_answer(request: Request, payload: AiAnswerRequest):
                 if isinstance(chunk, dict):
                     if "__sources__" in chunk:
                         sources_for_frontend = chunk["__sources__"]
-                        continue
-                    if "__reset__" in chunk:
-                        yield json.dumps({"type": "reset"}) + "\n"
                         continue
                 if chunk:
                     # Send each text chunk as a JSON line so the frontend can
