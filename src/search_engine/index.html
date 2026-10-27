@@ -57,57 +57,63 @@
            13 Responsive        14 Reduced motion
            ================================================================== */
 
-        /* ---------- 01 · Design tokens (Black & White only) ---------- */
+        /* ---------- 01 · Design tokens (shadcn-inspired B&W) ---------- */
         :root {
             color-scheme: light;
-            --bg: #e8e8e8;
-            --surface: #d9d9d9;
-            --surface-2: #c9c9c9;
-            --text: #1a1a1a;
-            --text-muted: #525252;
-            --text-faint: #737373;
-            --link: #1a1a1a;
-            --border: #a8a8a8;
-            --accent: #1a1a1a;
-            --accent-2: #525252;
-            --accent-soft: rgba(17, 17, 17, 0.08);
-            --ring: rgba(17, 17, 17, 0.12);
-            --shadow: rgba(0, 0, 0, 0.12);
-            --header-bg: rgba(232, 232, 232, 0.85);
-            --glow-1: transparent;
-            --glow-2: transparent;
-            --skeleton-base: #c9c9c9;
-            --skeleton-shine: #d9d9d9;
-            --mark-bg: rgba(17, 17, 17, 0.15);
-            --danger: #333333;
-            --logo-a: #1a1a1a;
-            --logo-b: #525252;
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --surface-2: #f5f5f5;
+            --surface-3: #ededed;
+            --text: #0f0f0f;
+            --text-muted: #71717a;
+            --text-faint: #a1a1aa;
+            --link: #0f0f0f;
+            --border: #d4d4d4;
+            --accent: #0f0f0f;
+            --accent-2: #71717a;
+            --accent-soft: rgba(15, 15, 15, 0.05);
+            --ring: rgba(15, 15, 15, 0.10);
+            --shadow: rgba(0, 0, 0, 0.05);
+            --header-bg: rgba(250, 250, 250, 0.8);
+            --skeleton-base: #ededed;
+            --skeleton-shine: #f5f5f5;
+            --mark-bg: rgba(15, 15, 15, 0.10);
+            --danger: #ef4444;
+            --logo-a: #0f0f0f;
+            --logo-b: #71717a;
+
+            --radius: 0.75rem;
+            --radius-sm: 0.5rem;
+            --radius-lg: 1rem;
         }
 
         :root[data-theme="dark"] {
             color-scheme: dark;
             --bg: #090909;
-            --surface: #141414;
-            --surface-2: #1f1f1f;
-            --text: #e5e5e5;
-            --text-muted: #a8a8a8;
-            --text-faint: #737373;
-            --link: #e5e5e5;
-            --border: #2a2a2a;
-            --accent: #e5e5e5;
-            --accent-2: #a8a8a8;
-            --accent-soft: rgba(229, 229, 229, 0.08);
-            --ring: rgba(229, 229, 229, 0.12);
-            --shadow: rgba(0, 0, 0, 0.70);
-            --header-bg: rgba(9, 9, 9, 0.85);
-            --glow-1: transparent;
-            --glow-2: transparent;
-            --skeleton-base: #1f1f1f;
-            --skeleton-shine: #2a2a2a;
-            --mark-bg: rgba(229, 229, 229, 0.15);
-            --danger: #e5e5e5;
-            --logo-a: #e5e5e5;
-            --logo-b: #999999;
+            --surface: #18181b;
+            --surface-2: #27272a;
+            --surface-3: #3f3f46;
+            --text: #fafafa;
+            --text-muted: #a1a1aa;
+            --text-faint: #71717a;
+            --link: #fafafa;
+            --border: #27272a;
+            --accent: #fafafa;
+            --accent-2: #a1a1aa;
+            --accent-soft: rgba(250, 250, 250, 0.05);
+            --ring: rgba(250, 250, 255, 0.10);
+            --shadow: rgba(0, 0, 0, 0.4);
+            --header-bg: rgba(9, 9, 9, 0.8);
+            --skeleton-base: #27272a;
+            --skeleton-shine: #3f3f46;
+            --mark-bg: rgba(250, 250, 250, 0.10);
+            --danger: #f87171;
+            --logo-a: #fafafa;
+            --logo-b: #a1a1aa;
+
+            --radius: 0.75rem;
+            --radius-sm: 0.5rem;
+            --radius-lg: 1rem;
         }
 
         /* ---------- 02 · Base & layout ---------- */
@@ -734,11 +740,11 @@
         /* ---------- Modern Font ---------- */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-        /* ---------- AI Mode panel (Black & White) ---------- */
+        /* ---------- AI Mode panel (shadcn + animated borders) ---------- */
         .ai-mode-panel {
             display: none;
-            margin: 16px 0 0;
-            animation: aiSlideIn 0.3s ease both;
+            margin: 20px 0 0;
+            animation: aiSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
         body.search-layout .ai-mode-panel { display: block; }
@@ -750,44 +756,54 @@
         }
         .ai-mode-panel.collapsed .ai-mode-thinking { display: none !important; }
 
-        /* Container card */
+        /* Container card with animated border */
         .ai-mode-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            box-shadow: 0 1px 3px 0 var(--shadow), 0 1px 2px -1px var(--shadow);
+        }
+
+        .ai-mode-card.border-animate::before {
+            border-radius: var(--radius-lg);
         }
 
         /* Header - clickable to collapse/expand */
         .ai-mode-header {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 11px 16px;
+            gap: 14px;
+            padding: 16px 20px;
             border-bottom: 1px solid var(--border);
             background: var(--surface);
             cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .ai-mode-header:hover {
+            background: var(--surface-2);
         }
 
         .ai-mode-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 3px 10px;
+            gap: 8px;
+            padding: 4px 12px;
             font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.12em;
+            font-weight: 600;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: var(--text);
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            border-radius: 20px;
+            color: var(--accent);
+            background: var(--accent-soft);
+            border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+            border-radius: 9999px;
             flex-shrink: 0;
         }
 
         .ai-mode-query {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
             color: var(--text);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -796,23 +812,24 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             flex: 1;
-            padding-right: 6px;
+            padding-right: 10px;
+            line-height: 1.25;
         }
 
         .ai-mode-chip {
             margin-left: auto;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 3px 10px;
-            font-size: 11px;
+            gap: 8px;
+            padding: 4px 12px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--text-muted);
             background: var(--surface-2);
             border: 1px solid var(--border);
-            border-radius: 20px;
+            border-radius: 9999px;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.2s;
             flex-shrink: 0;
         }
 
@@ -827,13 +844,13 @@
             border-color: var(--accent);
         }
 
-        .ai-mode-chip svg { width: 13px; height: 13px; }
+        .ai-mode-chip svg { width: 14px; height: 14px; }
 
         .ai-mode-toggle {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--text-muted);
-            margin-left: 8px;
+            margin-left: 10px;
             cursor: pointer;
             user-select: none;
         }
@@ -842,16 +859,16 @@
 
         /* Thinking / typing state - circular favicon marquee */
         .ai-mode-thinking {
-            padding: 12px 16px;
+            padding: 14px 20px;
             border-bottom: 1px solid var(--border);
             background: var(--surface);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 14px;
         }
 
         .thinking-label {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--text);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -861,7 +878,7 @@
 
         .thinking-ring {
             flex: 1;
-            height: 44px;
+            height: 48px;
             display: flex;
             align-items: center;
             overflow: hidden;
@@ -870,8 +887,8 @@
 
         .thinking-marquee {
             display: flex;
-            gap: 16px;
-            animation: marquee 10s linear infinite;
+            gap: 20px;
+            animation: marquee 12s linear infinite;
             will-change: transform;
         }
 
@@ -879,14 +896,14 @@
 
         .thinking-site {
             position: relative;
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             flex-shrink: 0;
-            border-radius: 50%;
+            border-radius: var(--radius-lg);
             overflow: hidden;
             border: 2px solid var(--border);
             background: var(--surface-2);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px 0 var(--shadow);
         }
 
         .thinking-site img {
@@ -899,7 +916,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 50%;
+            border-radius: inherit;
             border: 2px solid transparent;
             border-top-color: var(--accent);
             border-left-color: var(--accent);
@@ -910,71 +927,88 @@
 
         /* Answer body */
         .ai-mode-answer {
-            padding: 16px 20px 6px;
+            padding: 20px 24px 8px;
             color: var(--text);
-            line-height: 1.7;
-            font-size: 16px;
+            line-height: 1.75;
+            font-size: 17px;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             background: var(--surface);
+            min-height: 80px;
         }
 
-        .ai-mode-answer p { margin: 0 0 14px; }
+        .ai-mode-answer p { margin: 0 0 16px; }
         .ai-mode-answer p:last-child { margin-bottom: 10px; }
 
         .ai-mode-answer strong { color: var(--text); font-weight: 700; }
 
         .ai-mode-answer ul,
         .ai-mode-answer ol {
-            margin: 8px 0 14px;
-            padding-left: 22px;
+            margin: 10px 0 16px;
+            padding-left: 24px;
         }
 
-        .ai-mode-answer li { margin: 3px 0; color: var(--text-muted); }
+        .ai-mode-answer li { margin: 4px 0; color: var(--text-muted); }
 
         .ai-mode-answer a {
-            color: var(--text);
+            color: var(--link);
             text-decoration: none;
-            border-bottom: 1px solid var(--text-faint);
+            border-bottom: 1px solid color-mix(in srgb, var(--link) 35%, transparent);
         }
-        .ai-mode-answer a:hover { border-bottom-color: var(--text); }
+        .ai-mode-answer a:hover { border-bottom-color: var(--link); }
 
         .ai-mode-cite {
-            color: var(--text);
+            color: var(--link);
             font-weight: 700;
             cursor: pointer;
             text-decoration: none;
-            border-bottom: 1px dashed var(--text-faint);
+            border-bottom: 1px dashed color-mix(in srgb, var(--link) 50%, transparent);
         }
         .ai-mode-cite:hover { border-bottom-style: solid; }
+
+        /* Typing cursor */
+        .typing-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1em;
+            background: var(--text);
+            margin-left: 2px;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
 
         /* Sources toggle bar */
         .ai-mode-sources-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 20px;
+            padding: 10px 24px;
             border-top: 1px solid var(--border);
-            background: var(--surface);
+            background: var(--surface-2);
         }
 
         .ai-mode-sources-count {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--text-muted);
         }
 
         .ai-mode-sources {
-            padding: 0 20px 16px;
+            padding: 0 24px 20px;
             display: none;
         }
 
         .ai-mode-sources.open { display: block; }
 
         .ai-mode-sources h4 {
-            margin: 0 0 10px;
+            margin: 0 0 12px;
             font-size: 11px;
             font-weight: 700;
-            letter-spacing: 0.14em;
+            letter-spacing: 0.15em;
             text-transform: uppercase;
             color: var(--text-muted);
         }
@@ -983,65 +1017,66 @@
         .ai-source-table {
             width: 100%;
             border-collapse: separate;
-            border-spacing: 0 6px;
+            border-spacing: 0 8px;
         }
 
         .ai-source-table tr {
             background: var(--surface-2);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            transition: all 0.15s ease;
+            border-radius: var(--radius);
+            transition: all 0.2s;
             cursor: pointer;
         }
 
         .ai-source-table tr:hover {
             border-color: var(--accent);
-            background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+            background: color-mix(in srgb, var(--accent) 6%, var(--surface-2));
+            transform: translateY(-1px);
         }
 
         .ai-source-table td {
-            padding: 10px 14px;
+            padding: 12px 16px;
             border: none;
         }
 
         .ai-source-number-cell {
-            width: 30px;
+            width: 34px;
             text-align: center;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
             color: var(--text-faint);
-            background: var(--surface-2);
-            border-top-left-radius: 10px;
-            border-bottom-left-radius: 10px;
+            background: color-mix(in srgb, var(--text-faint) 12%, transparent);
+            border-top-left-radius: var(--radius-sm);
+            border-bottom-left-radius: var(--radius-sm);
         }
 
         .ai-source-favicon-cell {
-            width: 36px;
+            width: 42px;
             text-align: center;
         }
 
         .ai-source-favicon-cell img {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            border: 1px solid #ccc;
+            width: 26px;
+            height: 26px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
         }
 
-        .ai-source-content-cell { padding-left: 14px; }
+        .ai-source-content-cell { padding-left: 16px; }
 
         .ai-source-title {
             font-weight: 600;
             color: var(--text);
-            font-size: 13.5px;
+            font-size: 14px;
             display: block;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
             text-decoration: none;
         }
 
-        .ai-source-title:hover { color: var(--text); text-decoration: underline; }
+        .ai-source-title:hover { color: var(--link); text-decoration: underline; }
 
         .ai-source-url {
-            font-size: 11.5px;
+            font-size: 12.5px;
             color: var(--text-muted);
             overflow: hidden;
             text-overflow: ellipsis;
@@ -1050,13 +1085,13 @@
         }
 
         .ai-mode-error {
-            padding: 20px;
+            padding: 24px;
             color: var(--text);
-            font-size: 13px;
+            font-size: 14px;
             text-align: center;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: var(--radius-lg);
             margin: 16px 0 0;
         }
 
@@ -1071,6 +1106,60 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ---------- Animated borders (Google style) ---------- */
+        .border-animate {
+            position: relative;
+        }
+
+        .border-animate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                var(--accent) 50%,
+                transparent 100%
+            );
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0) padding-box;
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+            opacity: 0;
+            animation: borderShimmer 3s linear infinite;
+        }
+
+        .border-animate:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes borderShimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* shadcn-like card */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .card-sm { border-radius: var(--radius-sm); }
+        .card-lg { border-radius: var(--radius-lg); }
+
+        /* Modern typography scale */
+        .text-xs { font-size: 0.75rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-base { font-size: 1rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; }
 
         /* ---------- 09 · Skeleton ---------- */
 
@@ -1382,7 +1471,7 @@
 
         <!-- AI Mode answer panel -->
         <section id="aiModePanel" class="ai-mode-panel collapsed" aria-label="AI Mode answer">
-            <div class="ai-mode-card">
+            <div class="ai-mode-card border-animate">
                 <div class="ai-mode-header" onclick="AiMode.toggleCollapse()" role="button" tabindex="0" aria-label="Toggle AI Mode answer">
                     <span class="ai-mode-badge">AI Mode</span>
                     <span id="aiModeQuery" class="ai-mode-query"></span>
