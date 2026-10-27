@@ -111,13 +111,13 @@ async def search_metasearch(query: str, page: int = 1) -> list[dict]:
             if url in seen_urls:
                 continue
             seen_urls.add(url)
-            # Clean title - remove site name suffixes
+        # Clean title - remove site name suffixes
             clean_title = title
             for suffix in [" - Wikipedia", " - Bing", " - DuckDuckGo", " | Wikipedia"]:
                 if clean_title.endswith(suffix):
                     clean_title = clean_title[: -len(suffix)].strip()
-            # Truncate very long titles
-            if len(clean_title) > 100:
+            # Truncate very long titles only
+            if len(clean_title) > 120:
                 clean_title = clean_title[:97] + "..."
             results.append(
                 {

@@ -537,8 +537,8 @@
         /* Results Grid - Two Column Layout with Knowledge Panel */
         .results-grid {
             display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 24px;
+            grid-template-columns: 1fr 400px;
+            gap: 32px;
             align-items: start;
         }
 
@@ -548,7 +548,7 @@
 
         .knowledge-panel {
             position: sticky;
-            top: 20px;
+            top: 24px;
             z-index: 10;
         }
 
@@ -566,14 +566,14 @@
             position: relative;
             padding: 24px;
             margin: 0 -24px 24px;
-            border-radius: 18px;
+            border-radius: 16px;
             border: 1px solid var(--border);
             background: var(--surface);
             animation: fadeUp 0.3s ease both;
             animation-delay: calc(var(--i, 0) * 20ms);
             transition: all 0.2s ease;
             display: grid;
-            grid-template-columns: 90px 1fr;
+            grid-template-columns: 80px 1fr;
             gap: 24px;
             align-items: start;
             min-height: 150px;
@@ -581,8 +581,8 @@
 
         .result-item:hover {
             border-color: var(--accent);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px -6px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px -4px rgba(0,0,0,0.12);
         }
 
         .result-head {
@@ -597,9 +597,9 @@
 
         .favicon {
             position: relative;
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 72px;
+            height: 72px;
+            border-radius: 16px;
             overflow: hidden;
             background: var(--surface-2);
             border: 1px solid var(--border);
