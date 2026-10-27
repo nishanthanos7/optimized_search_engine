@@ -76,10 +76,10 @@ async def search_metasearch(query: str, page: int = 1) -> list[dict]:
     async def search_backend(backend: str) -> list[dict]:
         try:
             search_results = await asyncio.to_thread(
-                DDGS(timeout=5).text,
+                DDGS(timeout=4).text,
                 query,
                 page=page,
-                max_results=10,
+                max_results=12,
                 backend=backend,
             )
         except Exception:
@@ -96,6 +96,7 @@ async def search_metasearch(query: str, page: int = 1) -> list[dict]:
             if item.get("href", "").startswith("http")
         ]
 
+    # Run both backends in parallel (multi-agent).
     provider_results = await asyncio.gather(
         search_backend("bing"),
         search_backend("duckduckgo"),
@@ -104,12 +105,13 @@ async def search_metasearch(query: str, page: int = 1) -> list[dict]:
     if results:
         return results
 
+    # Fallback to auto backend.
     try:
         search_results = await asyncio.to_thread(
-            DDGS(timeout=5).text,
+            DDGS(timeout=4).text,
             query,
             page=page,
-            max_results=10,
+            max_results=12,
             backend="auto",
         )
     except Exception:

@@ -26,8 +26,9 @@
     <title>Metasearch — Search across the web</title>
     <meta name="description" content="A fast metasearch engine that searches DuckDuckGo, Bing and Wikipedia at once.">
     <meta name="theme-color" id="themeColor" content="#f7f9fd">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%234f7cff'/%3E%3Ccircle cx='45' cy='45' r='18' fill='none' stroke='white' stroke-width='8'/%3E%3Cpath d='M59 59 L74 74' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23111111'/%3E%3Ccircle cx='45' cy='45' r='18' fill='none' stroke='white' stroke-width='8'/%3E%3Cpath d='M59 59 L74 74' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
     <link rel="preconnect" href="http://127.0.0.1:8000">
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
         // Apply the saved/system theme before first paint to avoid a flash.
@@ -56,57 +57,57 @@
            13 Responsive        14 Reduced motion
            ================================================================== */
 
-        /* ---------- 01 · Design tokens ---------- */
+        /* ---------- 01 · Design tokens (Black & White only) ---------- */
         :root {
             color-scheme: light;
-            --bg: #f7f9fd;
-            --surface: #ffffff;
-            --surface-2: #eef2f9;
-            --text: #0f172a;
-            --text-muted: #55617a;
-            --text-faint: #8a95ab;
-            --link: #1d4ed8;
-            --border: #e2e8f3;
-            --accent: #4f7cff;
-            --accent-2: #8b5cf6;
-            --accent-soft: rgba(79, 124, 255, 0.10);
-            --ring: rgba(79, 124, 255, 0.20);
-            --shadow: rgba(15, 23, 42, 0.10);
-            --header-bg: rgba(247, 249, 253, 0.82);
-            --glow-1: rgba(79, 124, 255, 0.14);
-            --glow-2: rgba(139, 92, 246, 0.10);
-            --skeleton-base: #e9eef7;
-            --skeleton-shine: #f8fafd;
-            --mark-bg: rgba(79, 124, 255, 0.16);
-            --danger: #d92d20;
-            --logo-a: #2563eb;
-            --logo-b: #7c3aed;
+            --bg: #ffffff;
+            --surface: #fafafa;
+            --surface-2: #f0f0f0;
+            --text: #111111;
+            --text-muted: #666666;
+            --text-faint: #999999;
+            --link: #111111;
+            --border: #e5e5e5;
+            --accent: #111111;
+            --accent-2: #666666;
+            --accent-soft: rgba(17, 17, 17, 0.05);
+            --ring: rgba(17, 17, 17, 0.10);
+            --shadow: rgba(0, 0, 0, 0.08);
+            --header-bg: rgba(255, 255, 255, 0.85);
+            --glow-1: transparent;
+            --glow-2: transparent;
+            --skeleton-base: #eaeaea;
+            --skeleton-shine: #f5f5f5;
+            --mark-bg: rgba(17, 17, 17, 0.10);
+            --danger: #333333;
+            --logo-a: #111111;
+            --logo-b: #666666;
         }
 
         :root[data-theme="dark"] {
             color-scheme: dark;
-            --bg: #080d1a;
-            --surface: #111a2e;
-            --surface-2: #17233c;
-            --text: #e8eefc;
-            --text-muted: #a2aec7;
-            --text-faint: #7080a0;
-            --link: #8fb4ff;
-            --border: #223052;
-            --accent: #6b93ff;
-            --accent-2: #a78bfa;
-            --accent-soft: rgba(107, 147, 255, 0.14);
-            --ring: rgba(107, 147, 255, 0.24);
-            --shadow: rgba(0, 0, 0, 0.50);
-            --header-bg: rgba(8, 13, 26, 0.78);
-            --glow-1: rgba(79, 124, 255, 0.20);
-            --glow-2: rgba(139, 92, 246, 0.16);
-            --skeleton-base: #16213a;
-            --skeleton-shine: #1e2c4b;
-            --mark-bg: rgba(143, 180, 255, 0.20);
-            --danger: #ff8a8a;
-            --logo-a: #9bbcff;
-            --logo-b: #c4b5fd;
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --surface-2: #1e1e1e;
+            --text: #e5e5e5;
+            --text-muted: #999999;
+            --text-faint: #666666;
+            --link: #e5e5e5;
+            --border: #2a2a2a;
+            --accent: #e5e5e5;
+            --accent-2: #999999;
+            --accent-soft: rgba(229, 229, 229, 0.10);
+            --ring: rgba(229, 229, 229, 0.15);
+            --shadow: rgba(0, 0, 0, 0.60);
+            --header-bg: rgba(10, 10, 10, 0.85);
+            --glow-1: transparent;
+            --glow-2: transparent;
+            --skeleton-base: #1e1e1e;
+            --skeleton-shine: #2a2a2a;
+            --mark-bg: rgba(229, 229, 229, 0.10);
+            --danger: #e5e5e5;
+            --logo-a: #e5e5e5;
+            --logo-b: #999999;
         }
 
         /* ---------- 02 · Base & layout ---------- */
@@ -539,15 +540,25 @@
 
         .result-item {
             position: relative;
-            padding: 14px 16px;
-            margin: 0 -16px 2px;
-            border-radius: 14px;
-            animation: fadeUp 0.36s cubic-bezier(0.2, 0.7, 0.3, 1) both;
-            animation-delay: calc(var(--i, 0) * 32ms);
-            transition: background 0.15s ease;
+            padding: 18px 20px;
+            margin: 0 -20px 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            animation: fadeUp 0.3s ease both;
+            animation-delay: calc(var(--i, 0) * 25ms);
+            transition: all 0.15s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 150px;
         }
 
-        .result-item:hover { background: var(--surface); }
+        .result-item:hover {
+            border-color: #111;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px -4px rgba(0,0,0,0.08);
+        }
 
         .result-head {
             display: flex;
@@ -679,15 +690,21 @@
 
         .result-title {
             display: block;
-            font-size: 19px;
-            font-weight: 600;
-            line-height: 1.35;
-            letter-spacing: -0.012em;
-            color: var(--link);
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.4;
+            letter-spacing: -0.01em;
+            color: #111;
             text-decoration: none;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .result-title:hover {
+            color: #111;
             text-decoration: underline;
             text-decoration-thickness: 1px;
             text-underline-offset: 3px;
@@ -702,12 +719,358 @@
         }
 
         .result-snippet {
-            max-width: 74ch;
-            margin: 5px 0 0;
-            font-size: 14px;
-            line-height: 1.62;
-            color: var(--text-muted);
+            font-size: 14.5px;
+            line-height: 1.6;
+            color: #444;
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
+        }
+
+        /* ---------- Modern Font ---------- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        /* ---------- AI Mode panel (Black & White) ---------- */
+        .ai-mode-panel {
+            display: none;
+            margin: 16px 0 0;
+            animation: aiSlideIn 0.3s ease both;
+        }
+
+        body.search-layout .ai-mode-panel { display: block; }
+
+        /* Collapsed / expanded states */
+        .ai-mode-panel.collapsed .ai-mode-answer,
+        .ai-mode-panel.collapsed .ai-mode-sources {
+            display: none !important;
+        }
+        .ai-mode-panel.collapsed .ai-mode-thinking { display: none !important; }
+
+        /* Container card */
+        .ai-mode-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        /* Header - clickable to collapse/expand */
+        .ai-mode-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+        }
+
+        .ai-mode-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #111;
+            background: #f5f5f5;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            flex-shrink: 0;
+        }
+
+        .ai-mode-query {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            padding-right: 6px;
+        }
+
+        .ai-mode-chip {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            background: #f5f5f5;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .ai-mode-chip:hover {
+            border-color: #666;
+            background: #eaeaea;
+        }
+
+        .ai-mode-chip.active {
+            background: #111;
+            color: #fff;
+            border-color: #111;
+        }
+
+        .ai-mode-chip svg { width: 13px; height: 13px; }
+
+        .ai-mode-toggle {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-left: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .ai-mode-toggle:hover { color: #111; }
+
+        /* Thinking / typing state - circular favicon marquee */
+        .ai-mode-thinking {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .thinking-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #111;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .thinking-ring {
+            flex: 1;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .thinking-marquee {
+            display: flex;
+            gap: 16px;
+            animation: marquee 10s linear infinite;
+            will-change: transform;
+        }
+
+        .thinking-marquee.paused { animation-play-state: paused; }
+
+        .thinking-site {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            background: var(--surface-2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .thinking-site img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .thinking-site::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: #111;
+            border-left-color: #111;
+            animation: spin 1s linear infinite;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Answer body */
+        .ai-mode-answer {
+            padding: 16px 20px 6px;
+            color: #111;
+            line-height: 1.7;
+            font-size: 16px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--surface);
+        }
+
+        .ai-mode-answer p { margin: 0 0 14px; }
+        .ai-mode-answer p:last-child { margin-bottom: 10px; }
+
+        .ai-mode-answer strong { color: #111; font-weight: 700; }
+
+        .ai-mode-answer ul,
+        .ai-mode-answer ol {
+            margin: 8px 0 14px;
+            padding-left: 22px;
+        }
+
+        .ai-mode-answer li { margin: 3px 0; color: #444; }
+
+        .ai-mode-answer a {
+            color: #111;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(17,17,17,0.25);
+        }
+        .ai-mode-answer a:hover { border-bottom-color: #111; }
+
+        .ai-mode-cite {
+            color: #111;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(17,17,17,0.35);
+        }
+        .ai-mode-cite:hover { border-bottom-style: solid; }
+
+        /* Sources toggle bar */
+        .ai-mode-sources-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 20px;
+            border-top: 1px solid var(--border);
+            background: #fafafa;
+        }
+
+        .ai-mode-sources-count {
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .ai-mode-sources {
+            padding: 0 20px 16px;
+            display: none;
+        }
+
+        .ai-mode-sources.open { display: block; }
+
+        .ai-mode-sources h4 {
+            margin: 0 0 10px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        /* Sources table view - compact */
+        .ai-source-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 6px;
+        }
+
+        .ai-source-table tr {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .ai-source-table tr:hover {
+            border-color: #111;
+            background: #eaeaea;
+        }
+
+        .ai-source-table td {
+            padding: 10px 14px;
+            border: none;
+        }
+
+        .ai-source-number-cell {
+            width: 30px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #888;
+            background: #e9e9e9;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .ai-source-favicon-cell {
+            width: 36px;
+            text-align: center;
+        }
+
+        .ai-source-favicon-cell img {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 1px solid #ccc;
+        }
+
+        .ai-source-content-cell { padding-left: 14px; }
+
+        .ai-source-title {
+            font-weight: 600;
+            color: #111;
+            font-size: 13.5px;
+            display: block;
+            margin-bottom: 2px;
+            text-decoration: none;
+        }
+
+        .ai-source-title:hover { color: #111; text-decoration: underline; }
+
+        .ai-source-url {
+            font-size: 11.5px;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+        }
+
+        .ai-mode-error {
+            padding: 20px;
+            color: #333;
+            font-size: 13px;
+            text-align: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin: 16px 0 0;
+        }
+
+        @keyframes aiSlideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* ---------- 09 · Skeleton ---------- */
 
@@ -1016,6 +1379,35 @@
     <!-- Results -->
     <main class="main-content">
         <div id="resultsMeta" class="results-meta" aria-live="polite"></div>
+
+        <!-- AI Mode answer panel -->
+        <section id="aiModePanel" class="ai-mode-panel collapsed" aria-label="AI Mode answer">
+            <div class="ai-mode-card">
+                <div class="ai-mode-header" onclick="AiMode.toggleCollapse()" role="button" tabindex="0" aria-label="Toggle AI Mode answer">
+                    <span class="ai-mode-badge">AI Mode</span>
+                    <span id="aiModeQuery" class="ai-mode-query"></span>
+                    <span id="aiModeToggleText" class="ai-mode-toggle">Show answer</span>
+                    <span class="ai-mode-chip" id="aiModeSourcesToggle" onclick="AiMode.toggleSources(event)" title="View sources table">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="3" y1="9" x2="21" y2="9"/>
+                            <line x1="9" y1="21" x2="9" y2="3"/>
+                        </svg>
+                        Table
+                    </span>
+                </div>
+                <div id="aiModeThinking" class="ai-mode-thinking" style="display:none;">
+                    <span class="thinking-label">Thinking</span>
+                    <div class="thinking-ring">
+                        <div class="thinking-marquee" id="thinkingMarquee"></div>
+                    </div>
+                </div>
+                <div id="aiModeAnswer" class="ai-mode-answer"></div>
+                <div id="aiModeSources" class="ai-mode-sources"></div>
+                <div id="aiModeError" class="ai-mode-error"></div>
+            </div>
+        </section>
+
         <div id="resultsContainer" class="results"></div>
         <div id="paginationContainer"></div>
     </main>
@@ -1051,7 +1443,16 @@
                 meta: document.getElementById('resultsMeta'),
                 pagination: document.getElementById('paginationContainer'),
                 themeToggle: document.getElementById('themeToggle'),
-                themeColor: document.getElementById('themeColor')
+                themeColor: document.getElementById('themeColor'),
+                aiModePanel: document.getElementById('aiModePanel'),
+                aiModeAnswer: document.getElementById('aiModeAnswer'),
+                aiModeThinking: document.getElementById('aiModeThinking'),
+                aiModeThinkingMarquee: document.getElementById('thinkingMarquee'),
+                aiModeToggleText: document.getElementById('aiModeToggleText'),
+                aiModeSources: document.getElementById('aiModeSources'),
+                aiModeSourcesToggle: document.getElementById('aiModeSourcesToggle'),
+                aiModeError: document.getElementById('aiModeError'),
+                aiModeQuery: document.getElementById('aiModeQuery'),
             };
 
             /* ==============================================================
@@ -1063,7 +1464,14 @@
                 page: 1,
                 resultCount: 0,
                 searchSequence: 0,      // Guards against out-of-order responses.
-                searchAbort: null
+                searchAbort: null,
+                aiMode: {
+                    active: false,
+                    answer: '',
+                    sources: [],
+                    loading: false,
+                    error: ''
+                }
             };
 
             /* ==============================================================
@@ -1582,6 +1990,332 @@
             };
 
             /* ==============================================================
+               AI Mode module
+               ============================================================== */
+            const AiMode = {
+                escapeHtml(value) {
+                    return String(value == null ? '' : value).replace(/[&<>"']/g, character => ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;'
+                    }[character]));
+                },
+
+                linkify(text) {
+                    return text.replace(
+                        /(https?:\/\/[^\s<]+)/g,
+                        (url) => `<a href="${this.escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(url)}</a>`
+                    );
+                },
+
+                renderMarkdown(text) {
+                    let html = text
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/\n\n/g, '</p><p>')
+                        .replace(/\n/g, '<br>');
+                    return '<p>' + html + '</p>';
+                },
+
+                renderCitations(text, sources) {
+                    let out = text;
+                    out = out.replace(
+                        /\[(\d+)\]/g,
+                        (match, n) => {
+                            const idx = Number.parseInt(n, 10);
+                            if (Number.isInteger(idx) && idx >= 1 && idx <= sources.length) {
+                                return `<a class="ai-mode-cite" href="${this.escapeHtml(sources[idx - 1].url)}" target="_blank" rel="noopener noreferrer" aria-label="Source ${idx}">[${idx}]</a>`;
+                            }
+                            return match;
+                        }
+                    );
+                    return out;
+                },
+
+                toggleCollapse() {
+                    const isCollapsed = dom.aiModePanel.classList.contains('collapsed');
+                    dom.aiModePanel.classList.toggle('collapsed');
+                    dom.aiModeToggleText.textContent = isCollapsed ? 'Hide answer' : 'Show answer';
+                },
+
+                showThinking(siteUrls) {
+                    dom.aiModePanel.style.display = 'block';
+                    dom.aiModePanel.classList.remove('collapsed');
+                    dom.aiModeToggleText.textContent = 'Hide answer';
+                    dom.aiModeAnswer.style.display = 'none';
+                    dom.aiModeAnswer.innerHTML = '';
+                    dom.aiModeSources.style.display = 'none';
+                    dom.aiModeSources.classList.remove('open');
+                    dom.aiModeError.style.display = 'none';
+
+                    const favicons = siteUrls.map(url => {
+                        try {
+                            const d = new URL(url);
+                            return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(d.hostname)}`;
+                        } catch (e) { return ''; }
+                    }).filter(Boolean);
+
+                    // Duplicate the list so marquee loops seamlessly.
+                    const doubled = favicons.length ? [...favicons, ...favicons] : [];
+                    const siteHtml = doubled.map(fav => `
+                        <div class="thinking-site" title="Reading page…">
+                            <img src="${this.escapeHtml(fav)}" alt="" onerror="this.style.display='none'">
+                        </div>
+                    `).join('');
+
+                    dom.aiModeThinkingMarquee.innerHTML = siteHtml;
+                    if (doubled.length) {
+                        dom.aiModeThinkingMarquee.classList.remove('paused');
+                    } else {
+                        dom.aiModeThinkingMarquee.classList.add('paused');
+                    }
+                    dom.aiModeThinking.style.display = 'flex';
+                },
+
+                hideThinking() {
+                    dom.aiModeThinking.style.display = 'none';
+                    dom.aiModeAnswer.style.display = 'block';
+                },
+
+                render(text, sources) {
+                    state.aiMode.answer = text;
+                    state.aiMode.sources = sources;
+                    state.aiMode.loading = false;
+                    state.aiMode.error = '';
+                    state.aiMode.active = true;
+
+                    this.hideThinking();
+
+                    dom.aiModePanel.style.display = 'block';
+                    dom.aiModePanel.classList.remove('collapsed');
+                    dom.aiModeToggleText.textContent = 'Hide answer';
+                    dom.aiModeError.style.display = 'none';
+
+                    const html = this.renderCitations(this.linkify(this.renderMarkdown(text)), sources);
+                    dom.aiModeAnswer.innerHTML = html;
+
+                    this.renderSources(sources);
+                    dom.aiModePanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                },
+
+                renderSources(sources) {
+                    if (!sources || !sources.length) {
+                        dom.aiModeSources.innerHTML = '';
+                        dom.aiModeSources.classList.remove('open');
+                        return;
+                    }
+
+                    const rows = sources.map((src, idx) => {
+                        const num = idx + 1;
+                        let fav = '';
+                        try {
+                            const d = new URL(src.url);
+                            fav = `https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(d.hostname)}`;
+                        } catch (e) { }
+
+                        return `
+                            <tr>
+                                <td class="ai-source-number-cell">${num}</td>
+                                <td class="ai-source-favicon-cell">
+                                    <img src="${this.escapeHtml(fav)}" alt="" onerror="this.style.display='none'">
+                                </td>
+                                <td class="ai-source-content-cell">
+                                    <span class="ai-source-title">
+                                        <a href="${this.escapeHtml(src.url)}" target="_blank" rel="noopener noreferrer">
+                                            ${this.escapeHtml(src.title || src.url)}
+                                        </a>
+                                    </span>
+                                    <span class="ai-source-url">${this.escapeHtml(src.url)}</span>
+                                </td>
+                            </tr>`;
+                    }).join('');
+
+                    dom.aiModeSources.innerHTML = `
+                        <h4>Sources <span class="ai-mode-sources-count">(${sources.length})</span></h4>
+                        <table class="ai-source-table"><tbody>${rows}</tbody></table>
+                    `;
+                    dom.aiModeSources.classList.add('open');
+                },
+
+                toggleSources(event) {
+                    if (event) event.stopPropagation();
+                    dom.aiModeSources.classList.toggle('open');
+                    const chip = dom.aiModeSourcesToggle;
+                    if (chip) chip.classList.toggle('active');
+                },
+
+                scrollToSource(num) {
+                    const el = document.getElementById(`source-${num}`);
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                },
+
+                showError(message) {
+                    state.aiMode.loading = false;
+                    state.aiMode.active = false;
+                    this.hideThinking();
+                    dom.aiModePanel.style.display = 'block';
+                    dom.aiModePanel.classList.remove('collapsed');
+                    dom.aiModeToggleText.textContent = 'Hide answer';
+                    dom.aiModeAnswer.innerHTML = '';
+                    dom.aiModeSources.innerHTML = '';
+                    dom.aiModeSources.classList.remove('open');
+                    dom.aiModeError.textContent = message;
+                    dom.aiModeError.style.display = 'block';
+                },
+
+                clear() {
+                    state.aiMode.active = false;
+                    state.aiMode.answer = '';
+                    state.aiMode.sources = [];
+                    state.aiMode.loading = false;
+                    state.aiMode.error = '';
+                    dom.aiModePanel.style.display = 'none';
+                    dom.aiModePanel.classList.add('collapsed');
+                    dom.aiModeToggleText.textContent = 'Show answer';
+                    dom.aiModeAnswer.innerHTML = '';
+                    dom.aiModeThinking.innerHTML = '';
+                    dom.aiModeThinking.style.display = 'none';
+                    dom.aiModeSources.innerHTML = '';
+                    dom.aiModeSources.classList.remove('open');
+                    dom.aiModeError.style.display = 'none';
+                },
+
+                async fetchAndRender(query) {
+                    this.clear();
+                    state.aiMode.loading = true;
+                    dom.aiModePanel.style.display = 'block';
+                    dom.aiModePanel.classList.remove('collapsed');
+                    dom.aiModeToggleText.textContent = 'Hide answer';
+                    dom.aiModeQuery.textContent = this.escapeHtml(query);
+                    dom.aiModeAnswer.style.display = 'block';
+                    dom.aiModeAnswer.innerHTML = '<span class="typing-cursor"></span>';
+                    dom.aiModeSources.style.display = 'none';
+                    dom.aiModeError.style.display = 'none';
+
+                    // Start thinking with placeholder favicons.
+                    this.showThinking([]);
+
+                    try {
+                        const response = await fetch(`${CONFIG.baseUrl}/api/ai-answer`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ query })
+                        });
+                        if (!response.ok || !response.body) {
+                            throw new Error(`AI answer request failed (${response.status})`);
+                        }
+
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder();
+                        let buffer = '';
+                        let sources = [];
+                        let answer = '';
+                        let displayText = '';
+                        let wordIndex = 0;
+                        let words = [];
+                        let typingTimer = null;
+                        let thinkingHidden = false;
+
+                        const flushTyping = () => {
+                            if (typingTimer) {
+                                clearTimeout(typingTimer);
+                                typingTimer = null;
+                            }
+                        };
+
+                        const typeWriter = (newText) => {
+                            flushTyping();
+                            // Split new text into words and append to the words array.
+                            const newWords = newText.split(/(\s+)/);
+                            words = words.concat(newWords);
+                            // Reveal words one by one with small delay for typing effect.
+                            const revealNext = () => {
+                                if (wordIndex < words.length) {
+                                    displayText += words[wordIndex];
+                                    wordIndex++;
+                                    if (!thinkingHidden) {
+                                        dom.aiModeThinking.style.display = 'none';
+                                        dom.aiModeAnswer.style.display = 'block';
+                                        thinkingHidden = true;
+                                    }
+                                    const html = this.renderCitations(this.linkify(this.renderMarkdown(displayText)), sources) +
+                                        '<span class="typing-cursor"></span>';
+                                    dom.aiModeAnswer.innerHTML = html;
+                                    dom.aiModePanel.scrollTop = dom.aiModePanel.scrollHeight;
+                                    typingTimer = setTimeout(revealNext, 30);
+                                } else {
+                                    // Typing complete for this chunk, remove cursor.
+                                    const html = this.renderCitations(this.linkify(this.renderMarkdown(displayText)), sources);
+                                    dom.aiModeAnswer.innerHTML = html;
+                                    typingTimer = null;
+                                }
+                            };
+                            revealNext();
+                        };
+
+                        while (true) {
+                            const { value, done } = await reader.read();
+                            if (done) break;
+
+                            buffer += decoder.decode(value, { stream: true });
+                            let newlineIndex;
+                            while ((newlineIndex = buffer.indexOf('\n')) >= 0) {
+                                const line = buffer.slice(0, newlineIndex);
+                                buffer = buffer.slice(newlineIndex + 1);
+                                if (!line.trim()) continue;
+
+                                try {
+                                    const parsed = JSON.parse(line);
+                                    if (parsed.type === 'reset') {
+                                        // LLM upgrade: clear optimistic answer and start fresh.
+                                        answer = '';
+                                        displayText = '';
+                                        words = [];
+                                        wordIndex = 0;
+                                        flushTyping();
+                                        dom.aiModeAnswer.innerHTML = '';
+                                        continue;
+                                    }
+                                    if (parsed.type === 'text') {
+                                        answer += parsed.content;
+                                        typeWriter(parsed.content);
+                                    } else if (parsed.type === 'sources') {
+                                        sources = parsed.sources;
+                                    }
+                                } catch (error) {
+                                    // Ignore malformed lines.
+                                }
+                            }
+                            if (!typingTimer) {
+                                dom.aiModePanel.scrollTop = dom.aiModePanel.scrollHeight;
+                            }
+                        }
+
+                        // Finish any remaining typing.
+                        flushTyping();
+
+                        if (buffer.trim()) {
+                            try {
+                                const parsed = JSON.parse(buffer);
+                                if (parsed.type === 'sources') sources = parsed.sources;
+                            } catch (error) { /* ignore */ }
+                        }
+
+                        // Render final answer with real source favicons for thinking ring.
+                        state.aiMode.answer = answer;
+                        this.render(answer, sources);
+                    } catch (error) {
+                        console.error('AI Mode error:', error);
+                        this.showError('Could not generate AI answer. Please try again.');
+                    } finally {
+                        state.aiMode.loading = false;
+                    }
+                }
+            };
+
+            /* ==============================================================
                08 · Search controller
                ============================================================== */
             const Search = {
@@ -1622,6 +2356,7 @@
                         }
                         state.searchSequence += 1;
                         Renderer.results(state.cache.get(cacheKey) || []);
+                        if (safePage === 1) AiMode.fetchAndRender(normalizedQuery);
                         return;
                     }
 
@@ -1647,6 +2382,7 @@
                         const results = Array.isArray(data.results) ? data.results : [];
                         state.cache.set(cacheKey, results);
                         Renderer.results(results);
+                        if (safePage === 1) AiMode.fetchAndRender(normalizedQuery);
                     } catch (error) {
                         if (
                             sequence !== state.searchSequence ||
@@ -1674,6 +2410,7 @@
                     Suggestions.hide();
                     Search.setLayout('home');
                     Renderer.clear();
+                    AiMode.clear();
 
                     dom.input.value = '';
                     dom.clearBtn.hidden = true;
