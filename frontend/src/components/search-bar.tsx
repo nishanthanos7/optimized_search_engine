@@ -41,8 +41,7 @@ const SearchBarComponent = forwardRef<HTMLInputElement, SearchBarProps>(
     };
 
     const handleBlur = () => {
-      // Give the dropdown's mousedown handler a chance to run before closing.
-      setTimeout(() => setSuggestionsOpen(false), 120);
+      setTimeout(() => setSuggestionsOpen(false), 150);
     };
 
     const handleKeyDown = useCallback(
@@ -60,9 +59,7 @@ const SearchBarComponent = forwardRef<HTMLInputElement, SearchBarProps>(
         }
         if (e.key === "ArrowDown") {
           e.preventDefault();
-          setHighlightedIndex((i) =>
-            i >= suggestions.length - 1 ? i : i + 1
-          );
+          setHighlightedIndex((i) => (i >= suggestions.length - 1 ? i : i + 1));
           return;
         }
         if (e.key === "ArrowUp") {
@@ -81,14 +78,14 @@ const SearchBarComponent = forwardRef<HTMLInputElement, SearchBarProps>(
     };
 
     return (
-      <div className="search-wrapper relative w-full max-w-[720px]">
+      <div className="search-wrapper relative w-full max-w-[700px]">
         <form onSubmit={onSubmit} className="w-full">
           <div
             ref={anchorRef}
-            className="search-box flex items-center gap-3 px-4 py-2 bg-surface border border-border rounded-[20px] shadow-lg dark:bg-gray-800 dark:border-gray-600"
+            className="search-box flex items-center gap-3 px-4 py-2"
           >
-            <span className="text-gray-400 flex items-center">
-              <Search size={21} strokeWidth={2} />
+            <span className="text-text-faint flex items-center shrink-0">
+              <Search size={20} strokeWidth={2} />
             </span>
             <input
               ref={(node) => {
@@ -102,24 +99,24 @@ const SearchBarComponent = forwardRef<HTMLInputElement, SearchBarProps>(
               onKeyDown={handleKeyDown}
               onFocus={handleFocus}
               onBlur={handleBlur}
-              placeholder="Search the web..."
+              placeholder="Search the web…"
               autoComplete="off"
               autoCapitalize="off"
               spellCheck="false"
-              className="flex-1 min-w-0 bg-transparent border-none outline-none text-text font-normal text-[17px] placeholder:text-text-faint dark:text-text dark:placeholder:text-gray-500"
+              className="flex-1 min-w-0 bg-transparent border-none outline-none text-text font-normal text-[17px] placeholder:text-text-faint"
               aria-label="Search the web"
             />
             {query ? (
               <button
                 type="button"
                 onClick={onClear}
-                className="w-7 h-7 rounded-full text-text-faint hover:text-text hover:bg-surface-2 dark:hover:text-white dark:hover:bg-gray-700 transition-colors"
+                className="w-7 h-7 rounded-full text-text-faint hover:text-text hover:bg-surface-2 transition-colors dark:hover:text-white dark:hover:bg-surface-3"
                 aria-label="Clear search"
               >
                 <X size={18} strokeWidth={2.2} />
               </button>
             ) : null}
-            <Button type="submit" size="icon" className="h-10 w-10 rounded-[14px] bg-black text-white shadow-lg hover:brightness-106 active:scale-95 transition-all dark:bg-white dark:text-black">
+            <Button type="submit" size="icon" className="h-10 w-10 rounded-[14px] bg-[var(--accent)] text-white shadow-lg hover:bg-opacity-90 active:scale-95 transition-all">
               <Search size={20} strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" />
             </Button>
           </div>
