@@ -36,6 +36,7 @@ export default function HomePage() {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (!query.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestions([]);
       setSuggestionsOpen(false);
       return;
@@ -62,8 +63,14 @@ export default function HomePage() {
     }
     searchSeqRef.current += 1;
     const seq = searchSeqRef.current;
-    abortRef.current?.abort();
+    // Safely abort any in-flight request so paging never crashes.
+    try { abortRef.current?.abort(); } catch {}
     abortRef.current = new AbortController();
+    if (!q.trim()) {
+      setLoading(false);
+      setResults([]); setResultCount(0); setError("");
+      return;
+    }
     setLoading(true); setError("");
     try {
       const data = await search(q, p, abortRef.current.signal);
@@ -73,7 +80,7 @@ export default function HomePage() {
       setPage(data.page || 1);
     } catch (err) {
       if (seq !== searchSeqRef.current) return;
-      if (err instanceof DOMException && err.name === "AbortError") return;
+      if ((err as { name?: string })?.name === "AbortError") return;
       setError(err instanceof Error ? err.message : "Search failed");
       setResults([]); setResultCount(0);
     } finally {
@@ -167,17 +174,17 @@ export default function HomePage() {
   return (
     <Layout layout={isHome ? "home" : "search"}>
       <header className="header-container">
-        <Link href="/" className="logo flex items-center gap-3" aria-label="Metasearch home" onClick={handleClear}>
+        <Link href="/" className="logo flex items-center gap-3" aria-label="Nova home" onClick={handleClear}>
           <span className="logo-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="10.8" cy="10.8" r="6.8" />
               <path d="m20 20-4.1-4.1" />
             </svg>
           </span>
-          <span className="logo-text">Metasearch</span>
+          <span className="logo-text">Nova</span>
         </Link>
 
-        {isHome && <p className="home-tagline">Every corner of the web, one search away.</p>}
+        {isHome && <p className="home-tagline">Search the web, answered by AI.</p>}
 
         <SearchBar
           ref={inputRef}

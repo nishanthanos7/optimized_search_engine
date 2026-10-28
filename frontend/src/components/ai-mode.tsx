@@ -41,20 +41,21 @@ export function AiModePanel({
   const abortRef = useRef<AbortController | null>(null);
   const mountedRef = useRef(true);
 
-  const reset = useCallback(() => {
+  const stop = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
     setStatus("idle");
     setAnswer("");
     setSources([]);
     setSourcesOpen(false);
-  }, []);
+    onToggle(false);
+  }, [onToggle]);
 
   useEffect(() => {
     mountedRef.current = true;
     if (!enabled || !query.trim()) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      reset();
+      stop();
       return;
     }
 
@@ -67,10 +68,7 @@ export function AiModePanel({
       setSources([]);
       setSourcesOpen(false);
       try {
-        for await (const chunk of aiAnswer(
-          query,
-          abortRef.current.signal
-        )) {
+        for await (const chunk of aiAnswer(query, abortRef.current.signal)) {
           if (cancelled || !mountedRef.current || abortRef.current?.signal.aborted) {
             break;
           }
@@ -82,18 +80,16 @@ export function AiModePanel({
           }
         }
       } catch {
-        if (cancelled || !mountedRef.current) return;
-        setStatus("error");
+        if (!cancelled && mountedRef.current) setStatus("error");
       }
     })();
 
     return () => {
       cancelled = true;
       abortRef.current?.abort();
-      abortRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, query]);
+  }, [enabled, query, onToggle]);
 
   useEffect(() => {
     return () => {
@@ -101,11 +97,6 @@ export function AiModePanel({
       abortRef.current?.abort();
     };
   }, []);
-
-  const handleStop = () => {
-    reset();
-    onToggle(false);
-  };
 
   const renderAnswer = () => {
     const parts = answer.split(/(\[\d+\])/g);
@@ -117,12 +108,9 @@ export function AiModePanel({
         return (
           <span
             key={i}
-            className="ai-cite cursor-pointer select-none"
+            className="nova-cite cursor-pointer select-none"
             onClick={() => {
-              if (src) {
-                setSourcesOpen(true);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }
+              if (src) setSourcesOpen(true);
             }}
             title={src ? `${src.title} — ${src.url}` : `Source ${n}`}
           >
@@ -135,18 +123,16 @@ export function AiModePanel({
   };
 
   if (!enabled) return null;
-
-  const hasAnswer = status === "answer" || status === "error";
-  const showPanel = hasAnswer || status === "thinking";
-
+  const showPanel =
+    status === "thinking" || status === "answer" || status === "error";
   if (!showPanel) return null;
 
   return (
-    <section className="ai-mode-panel animate-slideUpFade">
-      <div className="ai-mode-card border-animate">
-        {/* Header — collapsible + toggle */}
+    <section className="nova-ai-panel animate-fadeIn">
+      <div className="nova-card border-glow">
+        {/* Header */}
         <div
-          className="ai-mode-header"
+          className="nova-header"
           onClick={() => setSourcesOpen((o) => !o)}
           role="button"
           tabIndex={0}
@@ -157,25 +143,27 @@ export function AiModePanel({
             }
           }}
         >
-          <div className="flex items-center gap-3">
-            <Sparkles className="w-5 h-5 text-[var(--accent)]" />
-            <span className="ai-mode-badge">AI Mode</span>
-            <span className="ai-mode-query" title={query}>
+          <div className="nova-header-left flex items-center gap-3">
+            <div className="nova-icon-wrap">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <span className="nova-badge">Nova AI</span>
+            <span className="nova-query" title={query}>
               {query}
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="nova-header-right flex items-center gap-2">
             {status === "thinking" && (
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 border border-border text-xs font-semibold text-text-muted">
-                <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] animate-spin" />
-                Generating answer
+              <div className="nova-thinking-chip flex items-center gap-2 px-2.5 py-1 rounded-full bg-[rgba(79,70,229,0.15)] border border-[rgba(79,70,229,0.35)] text-[var(--accent)] text-xs font-medium">
+                <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
+                Reading the web
               </div>
             )}
             <Button
               size="icon-xs"
               variant="outline"
-              onClick={handleStop}
-              className="h-7 w-7 p-0 text-text-faint hover:text-text hover:bg-surface-2 dark:hover:text-white dark:hover:bg-surface-3"
+              onClick={stop}
+              className="h-7 w-7 p-0 text-text-faint hover:text-white hover:bg-surface-2"
               aria-label="Turn off AI mode"
             >
               <X size={14} strokeWidth={2.2} />
@@ -185,14 +173,14 @@ export function AiModePanel({
 
         {/* Thinking state */}
         {status === "thinking" && (
-          <div className="ai-mode-thinking">
-            <span className="thinking-label">Reading search results</span>
-            <div className="thinking-ring">
-              <div className="thinking-marquee">
-                {["DuckDuckGo", "Bing", "Wikipedia"].map((name) => (
+          <div className="nova-thinking">
+            <span className="nova-thinking-label">Reading search results</span>
+            <div className="nova-ring">
+              <div className="nova-marquee">
+                {["DuckDuckGo", "Bing", "Wikipedia"].map((name, i) => (
                   <div
-                    key={name}
-                    className="thinking-site flex items-center justify-center text-[10px] font-semibold text-text-muted"
+                    key={i}
+                    className="nova-site flex items-center justify-center text-[10px] font-bold text-text-muted"
                   >
                     {name[0]}
                   </div>
@@ -204,62 +192,91 @@ export function AiModePanel({
 
         {/* Error state */}
         {status === "error" && (
-          <div className="px-6 py-4 text-center">
+          <div className="nova-error p-6 text-center">
             <p className="text-sm text-destructive">
-              Couldn&apos;t generate an AI answer. The LLM may not be configured.
+              Couldn&apos;t generate an AI answer. The NVIDIA Nemotron model may not be configured.
             </p>
           </div>
         )}
 
         {/* Answer */}
         {status === "answer" && (
-          <div className="ai-mode-answer" style={{ whiteSpace: "pre-wrap" }}>
-            {renderAnswer()}
+          <div
+            className="nova-answer"
+            style={{ whiteSpace: "pre-wrap", minHeight: "80px" }}
+          >
+            {answer.length ? (
+              <>
+                {renderAnswer()}
+                <span className="nova-cursor">▋</span>
+              </>
+            ) : (
+              <span className="nova-placeholder">Generating answer…</span>
+            )}
           </div>
         )}
 
-        {/* Answer bar (expand/collapse hint + sources count)} */}
-        {hasAnswer && (
-          <div className="ai-mode-answer-bar">
-            <span className="ai-mode-answer-toggle">
-              {sourcesOpen ? "Show less" : `Show sources (${sources.length})`}
-              <ExternalLink size={14} strokeWidth={1.8} />
+        {/* Answer bar */}
+        {status === "answer" && (
+          <div className="nova-bar">
+            <span
+              className="nova-bar-text cursor-pointer select-none"
+              onClick={() => setSourcesOpen((o) => !o)}
+            >
+              {sourcesOpen ? "Collapse sources" : `Sources (${sources.length})`}
+              <ExternalLink
+                size={14}
+                strokeWidth={1.8}
+                className="ml-1 opacity-60"
+              />
             </span>
-            {status !== "error" && (
-              <Button
-                size="icon-xs"
-                onClick={handleStop}
-                className="h-7 w-7 p-0 text-text-faint hover:text-text hover:bg-surface-2 dark:hover:text-white dark:hover:bg-surface-3"
-                aria-label="Dismiss AI answer"
-              >
-                <X size={14} strokeWidth={2.2} />
-              </Button>
-            )}
+            <Button
+              size="icon-xs"
+              variant="outline"
+              onClick={stop}
+              className="h-7 w-7 p-0 text-text-faint hover:text-white hover:bg-surface-2"
+              aria-label="Dismiss AI answer"
+            >
+              <X size={14} strokeWidth={2.2} />
+            </Button>
           </div>
         )}
 
         {/* Sources */}
         {sources.length > 0 && sourcesOpen && (
-          <div className="ai-mode-sources open">
-            <h4>Sources</h4>
-            <table className="ai-source-table">
-              <tbody>
-                {sources.map((src, i) => (
-                  <tr key={i} onClick={() => window.open(src.url, "_blank")} style={{ cursor: "pointer" }}>
-                    <td className="ai-source-number-cell">{i + 1}</td>
-                    <td className="ai-source-favicon-cell">
-                      <img src={faviconUrl(src.url)} alt="" loading="lazy" />
-                    </td>
-                    <td className="ai-source-content-cell">
-                      <span className="ai-source-title" title={src.title}>
-                        {src.title || src.url}
-                      </span>
-                      <span className="ai-source-url">{src.domain}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="nova-sources">
+            <h4 className="nova-sources-title">Sources</h4>
+            <div className="nova-source-list">
+              {sources.map((src, i) => (
+                <a
+                  key={i}
+                  href={src.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nova-source-row"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="nova-source-num">{i + 1}</div>
+                  <img
+                    src={faviconUrl(src.url)}
+                    alt=""
+                    className="nova-source-fav"
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                  <div className="nova-source-body">
+                    <div className="nova-source-title">
+                      {src.title || src.url}
+                    </div>
+                    <div className="nova-source-url">
+                      {src.domain || new URL(src.url).hostname}
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
         )}
       </div>
