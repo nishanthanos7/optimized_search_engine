@@ -34,9 +34,7 @@ export default function HomePage() {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (!query.trim()) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestions([]);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestionsOpen(false);
       return;
     }
