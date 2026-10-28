@@ -550,3 +550,293 @@
   margin-right: auto;
   line-height: 1.6;
 }
+
+/* ---------- AI Mode panel ---------- */
+.ai-mode-panel {
+  margin: 16px 0 0;
+  animation: aiSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ai-mode-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 var(--shadow), 0 1px 2px -1px var(--shadow);
+}
+
+.ai-mode-card.border-animate::before {
+  border-radius: var(--radius-lg);
+}
+
+.ai-mode-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.ai-mode-header:hover {
+  background: var(--surface-2);
+}
+
+.ai-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.ai-mode-query {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  padding-right: 10px;
+  line-height: 1.25;
+}
+
+.ai-mode-thinking {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.thinking-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.thinking-ring {
+  flex: 1;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.thinking-marquee {
+  display: flex;
+  gap: 16px;
+  animation: marquee 10s linear infinite;
+  will-change: transform;
+}
+
+.thinking-site {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  background: var(--surface-2);
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px 0 var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-faint);
+}
+
+.thinking-site::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid transparent;
+  border-top-color: var(--accent);
+  border-left-color: var(--accent);
+  animation: spin 1s linear infinite;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.ai-mode-answer {
+  padding: 18px 22px 8px;
+  color: var(--text);
+  line-height: 1.75;
+  font-size: 16.5px;
+  font-family: var(--font-sans);
+  background: var(--surface);
+  min-height: 80px;
+}
+
+.ai-mode-answer p {
+  margin: 0 0 14px;
+}
+.ai-mode-answer p:last-child {
+  margin-bottom: 8px;
+}
+
+.ai-mode-answer a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--link) 35%, transparent);
+}
+.ai-mode-answer a:hover {
+  border-bottom-color: var(--link);
+}
+
+.ai-cite {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px dashed color-mix(in srgb, var(--accent) 50%, transparent);
+  padding: 0 1px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.ai-cite:hover {
+  border-bottom-style: solid;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.ai-mode-answer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.ai-mode-answer-toggle {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ai-mode-answer-toggle:hover {
+  color: var(--text);
+}
+
+.ai-mode-sources {
+  padding: 0 22px 18px;
+  display: none;
+}
+.ai-mode-sources.open {
+  display: block;
+}
+
+.ai-mode-sources h4 {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ai-source-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+.ai-source-table tr {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: all 0.2s;
+}
+.ai-source-table tr:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface-2));
+  transform: translateY(-1px);
+}
+
+.ai-source-table td {
+  padding: 10px 14px;
+  border: none;
+  vertical-align: middle;
+}
+
+.ai-source-number-cell {
+  width: 30px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-faint);
+  background: color-mix(in srgb, var(--text-faint) 12%, transparent);
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+.ai-source-favicon-cell {
+  width: 38px;
+  text-align: center;
+}
+.ai-source-favicon-cell img {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.ai-source-content-cell {
+  padding-left: 14px;
+}
+
+.ai-source-title {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 13.5px;
+  display: block;
+  margin-bottom: 2px;
+  text-decoration: none;
+}
+.ai-source-title:hover {
+  color: var(--link);
+  text-decoration: underline;
+}
+
+.ai-source-url {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+@keyframes aiSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

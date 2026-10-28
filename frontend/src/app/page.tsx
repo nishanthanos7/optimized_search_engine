@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Search, AlertCircle } from "lucide-react";
+import { Search, AlertCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Layout } from "@/components/layout";
 import { cn } from "@/lib/utils";
 import { search, suggest, health, type SearchResult } from "@/lib/api";
 import { SearchBar } from "@/components/search-bar";
+import { AiModePanel } from "@/components/ai-mode";
 
 export default function HomePage() {
   const [query, setQuery] = useState("");
@@ -20,6 +21,7 @@ export default function HomePage() {
   const [error, setError] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [aiMode, setAiMode] = useState(false);
   const searchSeqRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -194,7 +196,28 @@ export default function HomePage() {
             Press <kbd>/</kbd> to focus &middot; Searches DuckDuckGo, Bing &amp; Wikipedia
           </p>
         )}
+        {!isHome && (
+          <Button
+            size="sm"
+            variant={aiMode ? "default" : "outline"}
+            onClick={() => setAiMode(!aiMode)}
+            className="ml-3 flex items-center gap-2"
+            aria-pressed={aiMode}
+            title={aiMode ? "Turn off AI Mode" : "Turn on AI Mode"}
+          >
+            <Sparkles size={16} strokeWidth={2} />
+            <span>AI Mode</span>
+          </Button>
+        )}
       </header>
+
+      {!isHome && aiMode && (
+        <AiModePanel
+          query={activeQuery}
+          enabled={aiMode}
+          onToggle={setAiMode}
+        />
+      )}
 
       {!isHome && (
         <main className="main-content">
