@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SuggestionsDropdownProps {
   suggestions: string[];
   open: boolean;
+  highlightedIndex: number;
   onSelect: (suggestion: string) => void;
   onClose: () => void;
   anchorRef: React.RefObject<HTMLDivElement | null>;
@@ -15,48 +16,17 @@ interface SuggestionsDropdownProps {
 export function SuggestionsDropdown({
   suggestions,
   open,
+  highlightedIndex,
   onSelect,
   onClose,
   anchorRef,
 }: SuggestionsDropdownProps) {
   const listRef = useRef<HTMLUListElement | null>(null);
-  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
 
-  const handleSelect = useCallback(
-    (suggestion: string) => {
-      onSelect(suggestion);
-      onClose();
-    },
-    [onSelect, onClose]
-  );
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (!open) return;
-      if (e.key === "Escape") {
-        onClose();
-        return;
-      }
-      if (e.key === "Enter" && highlightedIndex >= 0) {
-        e.preventDefault();
-        handleSelect(suggestions[highlightedIndex]);
-        return;
-      }
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setHighlightedIndex((i) =>
-          i >= suggestions.length - 1 ? i : i + 1
-        );
-        return;
-      }
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setHighlightedIndex((i) => (i <= 0 ? -1 : i - 1));
-        return;
-      }
-    },
-    [open, suggestions, highlightedIndex, onClose, handleSelect]
-  );
+  const handleSelect = (suggestion: string) => {
+    onSelect(suggestion);
+    onClose();
+  };
 
   // Scroll the highlighted option into view.
   useEffect(() => {
@@ -66,11 +36,9 @@ export function SuggestionsDropdown({
     if (!option || !list) return;
     const optionBottom = option.offsetTop + option.offsetHeight;
     const listBottom = list.offsetTop + list.offsetHeight;
-    const listScrollTop = list.scrollTop;
-    const listHeight = list.offsetHeight;
-    if (optionBottom > listBottom + listScrollTop) {
-      list.scrollTop = optionBottom - listHeight;
-    } else if (option.offsetTop < listScrollTop) {
+    if (optionBottom > listBottom + list.scrollTop) {
+      list.scrollTop = optionBottom - list.offsetHeight;
+    } else if (option.offsetTop < list.scrollTop) {
       list.scrollTop = option.offsetTop;
     }
   }, [open, highlightedIndex]);
@@ -95,10 +63,7 @@ export function SuggestionsDropdown({
   if (!open || suggestions.length === 0) return null;
 
   return (
-    <div
-      ref={anchorRef}
-      className="relative inline-block"
-    >
+    <div ref={anchorRef} className="relative inline-block">
       <ul
         ref={listRef}
         role="listbox"
@@ -120,11 +85,10 @@ export function SuggestionsDropdown({
                 e.preventDefault();
                 handleSelect(suggestion);
               }}
-              onMouseEnter={() => setHighlightedIndex(index)}
               className={cn(
                 "flex items-center gap-3 px-4 py-3 text-sm text-text transition-colors",
                 isHighlighted
-                  ? "bg-surface-2 text-accent dark:bg-gray-700 dark:text-accent"
+                  ? "bg-surface-2 dark:bg-gray-700"
                   : "hover:bg-surface-2 dark:hover:bg-gray-700"
               )}
             >
