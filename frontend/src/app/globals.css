@@ -255,12 +255,10 @@
 /* Suggestions */
 .suggestions-list {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   left: 0;
-  right: 0;
   width: 100%;
   max-width: 700px;
-  margin: 0 auto;
   z-index: 50;
   border-radius: 16px;
   border: 1px solid var(--border);

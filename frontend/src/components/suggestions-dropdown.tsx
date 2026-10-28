@@ -28,6 +28,7 @@ export function SuggestionsDropdown({
     onClose();
   };
 
+  // Scroll the highlighted option into view.
   useEffect(() => {
     if (!open || highlightedIndex < 0) return;
     const list = listRef.current;
@@ -42,6 +43,7 @@ export function SuggestionsDropdown({
     }
   }, [open, highlightedIndex]);
 
+  // Click outside the search box to close.
   useEffect(() => {
     if (!open) return;
     const handleMousedown = (e: MouseEvent) => {
@@ -57,39 +59,37 @@ export function SuggestionsDropdown({
   if (!open || suggestions.length === 0) return null;
 
   return (
-    <div ref={anchorRef} className="relative inline-block">
-      <ul
-        ref={listRef}
-        role="listbox"
-        aria-label="Search suggestions"
-        className="suggestions-list"
-      >
-        {suggestions.map((suggestion, index) => {
-          const isHighlighted = index === highlightedIndex;
-          return (
-            <li
-              key={suggestion}
-              role="option"
-              aria-selected={isHighlighted}
-              id={`suggestion-${index}`}
-              data-highlighted={isHighlighted}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                handleSelect(suggestion);
-              }}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 text-sm text-text transition-colors",
-                isHighlighted ? "bg-accent text-white" : "hover:bg-surface-2",
-              )}
-            >
-              <span className="icon">
-                <Search size={14} strokeWidth={2} className="w-4 h-4" />
-              </span>
-              <span className="flex-1 min-w-0 truncate">{suggestion}</span>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+    <ul
+      ref={listRef}
+      role="listbox"
+      aria-label="Search suggestions"
+      className="suggestions-list"
+    >
+      {suggestions.map((suggestion, index) => {
+        const isHighlighted = index === highlightedIndex;
+        return (
+          <li
+            key={suggestion}
+            role="option"
+            aria-selected={isHighlighted}
+            id={`suggestion-${index}`}
+            data-highlighted={isHighlighted}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              handleSelect(suggestion);
+            }}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 text-sm text-text transition-colors",
+              isHighlighted ? "bg-accent text-white" : "hover:bg-surface-2",
+            )}
+          >
+            <span className="icon shrink-0">
+              <Search size={14} strokeWidth={2} className="w-4 h-4" />
+            </span>
+            <span className="flex-1 min-w-0 truncate">{suggestion}</span>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

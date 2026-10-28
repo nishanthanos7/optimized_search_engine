@@ -120,15 +120,15 @@ const SearchBarComponent = forwardRef<HTMLInputElement, SearchBarProps>(
               <Search size={20} strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" />
             </Button>
           </div>
-          <SuggestionsDropdown
-            suggestions={suggestions}
-            open={suggestionsOpen}
-            highlightedIndex={highlightedIndex}
-            onSelect={handleSuggestion}
-            onClose={() => setSuggestionsOpen(false)}
-            anchorRef={anchorRef}
-          />
         </form>
+        <SuggestionsDropdown
+          suggestions={suggestions}
+          open={suggestionsOpen}
+          highlightedIndex={highlightedIndex}
+          onSelect={handleSuggestion}
+          onClose={() => setSuggestionsOpen(false)}
+          anchorRef={anchorRef}
+        />
       </div>
     );
   },
