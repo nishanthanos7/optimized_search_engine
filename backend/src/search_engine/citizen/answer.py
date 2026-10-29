@@ -56,7 +56,7 @@ def build_prompt(
         "- If a local ward-office detail is not in the excerpts, say it is not",
         "  in the indexed national sources.",
         "- Never fill gaps from general knowledge. If something is not in the",
-        "  excerpts, say it is not available.",
+        "  excerpts, say it is not available and suggest contacting the office.",
         f"- {lang_instruction}",
         "",
     ]

@@ -11,8 +11,8 @@ import re
 
 from .retrieval import Source
 
-REFUSAL_EN = "I couldn't find this in the official sources I have."
-REFUSAL_NE = "मसँग भएका आधिकारिक स्रोतहरूमा यो जानकारी भेटिएन।"
+REFUSAL_EN = "I couldn't find this in the official sources I have. Please contact the relevant government office or visit the official portal for the most current information."
+REFUSAL_NE = "मसँग भएका आधिकारिक स्रोतहरूमा यो जानकारी भेटिएन। कृपया सान्दर्भिक सरकारी कार्यालयमा सम्पर्क गर्नुहोस् वा आधिकारिक पोर्टल भिजिट गर्नुहोस्।"
 SAFE_SENTENCE_EN = "I can't verify this detail from the official sources."
 SAFE_SENTENCE_NE = "यो विवरण आधिकारिक स्रोतबाट पुष्टि गर्न सकिएन।"
 

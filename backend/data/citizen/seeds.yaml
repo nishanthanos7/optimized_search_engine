@@ -46,12 +46,6 @@
   office: Department of Transport Management
   doc_type: procedure
   lang: ne
-- service: driving-licence
-  url: https://applydl.dotm.gov.np/login
-  title: Online driving licence application
-  office: Department of Transport Management
-  doc_type: procedure
-  lang: en
 - service: citizenship
   url: https://moha.gov.np/service/9
   title: नागरिकता
