@@ -1,3 +1,6 @@
 .venv/
 __pycache__/
 .env
+backend/data/citizen/index.db
+backend/data/citizen/index.db-wal
+backend/data/citizen/index.db-shm

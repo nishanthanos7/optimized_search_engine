@@ -1,0 +1,84 @@
+- service: passport
+  url: https://nepalpassport.gov.np/process/process-7
+  title: How to apply for an ordinary passport
+  office: Department of Passports
+  doc_type: procedure
+  lang: en
+- service: passport
+  url: https://nepalpassport.gov.np/process/process-22
+  title: Required documents for e-passport application
+  office: Department of Passports
+  doc_type: procedure
+  lang: en
+- service: passport
+  url: https://nepalpassport.gov.np/process/process-25
+  title: Revenue for passport
+  office: Department of Passports
+  doc_type: fee
+  lang: en
+- service: passport
+  url: https://nepalpassport.gov.np/process/process-8
+  title: Where to apply for a passport
+  office: Department of Passports
+  doc_type: procedure
+  lang: en
+- service: passport
+  url: https://nepalpassport.gov.np/process/-4
+  title: साधारण राहदानी बनाउन के गर्ने
+  office: राहदानी विभाग
+  doc_type: procedure
+  lang: ne
+- service: passport
+  url: https://nepalpassport.gov.np/process/-3
+  title: राहदानी बनाउनका लागि आवश्यक कागजात
+  office: राहदानी विभाग
+  doc_type: procedure
+  lang: ne
+- service: passport
+  url: https://nepalpassport.gov.np/process/-41
+  title: राहदानीका लागि लाग्ने दस्तुर
+  office: राहदानी विभाग
+  doc_type: fee
+  lang: ne
+- service: driving-licence
+  url: https://dotm.gov.np/
+  title: Department of Transport Management
+  office: Department of Transport Management
+  doc_type: procedure
+  lang: ne
+- service: driving-licence
+  url: https://applydl.dotm.gov.np/login
+  title: Online driving licence application
+  office: Department of Transport Management
+  doc_type: procedure
+  lang: en
+- service: citizenship
+  url: https://moha.gov.np/service/9
+  title: नागरिकता
+  office: Ministry of Home Affairs
+  doc_type: procedure
+  lang: ne
+- service: citizenship
+  url: https://www.moha.gov.np/en/office-layout/765
+  title: Citizenship and National Identity Card Section
+  office: Ministry of Home Affairs
+  doc_type: procedure
+  lang: en
+- service: birth-registration
+  url: https://donidcr.gov.np/pages/about-frequently-asked-questions--registration-5/
+  title: Frequently asked questions on registration
+  office: Department of National ID and Civil Registration
+  doc_type: faq
+  lang: ne
+- service: birth-registration
+  url: https://public.donidcr.gov.np/
+  title: Online vital events registration
+  office: Department of National ID and Civil Registration
+  doc_type: procedure
+  lang: ne
+- service: marriage-registration
+  url: https://donidcr.gov.np/pages/about-frequently-asked-questions--registration-5/
+  title: Frequently asked questions on registration
+  office: Department of National ID and Civil Registration
+  doc_type: faq
+  lang: ne

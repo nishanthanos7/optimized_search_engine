@@ -1,0 +1,18 @@
+passport:
+  en: [passport, passports, e-passport, renewal, renew]
+  ne: [राहदानी, राहदानीको, पासपोर्ट, नवीकरण]
+driving-licence:
+  en: [driving licence, driving license, licence, license, renewal, renew, age, test]
+  ne: [सवारी चालक अनुमतिपत्र, चालक अनुमतिपत्र, लाइसेन्स, नवीकरण, उमेर, परीक्षा]
+citizenship:
+  en: [citizenship, certificate, citizenship certificate]
+  ne: [नागरिकता, नागरिकता प्रमाणपत्र, प्रमाणपत्र]
+birth-registration:
+  en: [birth, registration, birth registration, birth certificate, documents, fee, free]
+  ne: [जन्म, दर्ता, जन्म दर्ता, जन्म प्रमाणपत्र, कागजात, शुल्क, निःशुल्क]
+marriage-registration:
+  en: [marriage, registration, marriage registration, marriage certificate, documents, fee]
+  ne: [विवाह, दर्ता, विवाह दर्ता, विवाह प्रमाणपत्र, कागजात, शुल्क]
+common:
+  en: [documents, required, fee, office, time, days, online, apply, process, age, free]
+  ne: [कागजात, आवश्यक, शुल्क, कार्यालय, समय, दिन, अनलाइन, आवेदन, प्रक्रिया, उमेर, निःशुल्क]

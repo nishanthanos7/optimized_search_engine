@@ -1,0 +1,88 @@
+- id: passport-documents
+  service: passport
+  question_en: What documents do I need for a new passport?
+  question_ne: नयाँ राहदानीका लागि कुन कागजात चाहिन्छ?
+  expected_facts:
+    - application form
+    - citizenship
+    - photo
+  expected_sources:
+    - https://nepalpassport.gov.np/process/process-22
+  must_refuse: false
+- id: passport-fee-time
+  service: passport
+  question_en: How much is the passport fee, and how long does it take?
+  question_ne: राहदानी शुल्क कति लाग्छ र समय कति लाग्छ?
+  expected_facts:
+    - NPR 12,000
+    - 34 pages
+  expected_sources:
+    - https://nepalpassport.gov.np/process/process-25
+  must_refuse: false
+- id: driving-licence-renew
+  service: driving-licence
+  question_en: How do I renew my driving licence?
+  question_ne: सवारी चालक अनुमतिपत्र कसरी नवीकरण गर्ने?
+  expected_facts: []
+  expected_sources:
+    - https://dotm.gov.np/
+  must_refuse: false
+- id: driving-licence-age
+  service: driving-licence
+  question_en: What is the minimum age for a driving licence?
+  question_ne: सवारी चालक अनुमतिपत्रको लागि न्यूनतम उमेर कति हो?
+  expected_facts: []
+  expected_sources:
+    - https://dotm.gov.np/
+  must_refuse: false
+- id: citizenship-how
+  service: citizenship
+  question_en: How do I get a citizenship certificate?
+  question_ne: नागरिकता प्रमाणपत्र कसरी पाउन सकिन्छ?
+  expected_facts: []
+  expected_sources:
+    - https://moha.gov.np/service/9
+  must_refuse: false
+- id: birth-documents
+  service: birth-registration
+  question_en: What documents are needed for birth registration?
+  question_ne: जन्म दर्ताका लागि कुन कागजात चाहिन्छ?
+  expected_facts: []
+  expected_sources:
+    - https://donidcr.gov.np/pages/about-frequently-asked-questions--registration-5/
+  must_refuse: false
+- id: marriage-how
+  service: marriage-registration
+  question_en: Where and how do I register a marriage?
+  question_ne: विवाह कहाँ र कसरी दर्ता गर्ने?
+  expected_facts: []
+  expected_sources:
+    - https://donidcr.gov.np/pages/about-frequently-asked-questions--registration-5/
+  must_refuse: false
+- id: cross-service-online
+  service: passport
+  question_en: Can I apply for these services online?
+  question_ne: म यी सेवाहरू अनलाइन आवेदन दिन सक्छु?
+  expected_facts: []
+  expected_sources:
+    - https://nepalpassport.gov.np/
+    - https://dotm.gov.np/
+    - https://moha.gov.np/
+    - https://donidcr.gov.np/
+  must_refuse: false
+- id: passport-office
+  service: passport
+  question_en: Which government office issues a passport?
+  question_ne: कुन सरकारी कार्यालय राहदानी जारी गर्छ?
+  expected_facts:
+    - Department of Passports
+  expected_sources:
+    - https://nepalpassport.gov.np/
+  must_refuse: false
+- id: ward-office-hours
+  service: birth-registration
+  question_en: What are the office hours of my local ward office?
+  question_ne: मेरो स्थानीय वडा कार्यालयको कार्यालय समय कति हो?
+  expected_facts: []
+  expected_sources: []
+  must_refuse: true
