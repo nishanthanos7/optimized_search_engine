@@ -4,6 +4,8 @@ import type { CitizenSource } from "@/lib/api";
 import { useCitizenAnswer } from "@/hooks/use-citizen-answer";
 import { Button } from "@/components/ui/button";
 import { CitizenSources } from "./citizen-sources";
+import { Feedback } from "./feedback";
+import { ShareButton } from "./share-button";
 import { RotateCcw, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -211,20 +213,11 @@ export function CitizenAnswerPanel({
                 {needsReviewBadge}
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {}}
-                  className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-foreground"
-                >
-                  <span>Was this helpful?</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {}}
-                  className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-foreground"
-                >
-                  <span>Share on WhatsApp</span>
-                </button>
+                <Feedback query={query} service={service} />
+                <ShareButton
+                  text={answer}
+                  url={typeof window !== "undefined" ? window.location.href : ""}
+                />
               </div>
             </div>
             <p className="mt-2 text-xs text-faint">
