@@ -41,7 +41,7 @@
   question_ne: नागरिकता प्रमाणपत्र कसरी पाउन सकिन्छ?
   expected_facts: []
   expected_sources:
-    - https://moha.gov.np/service/9
+    - https://www.moha.gov.np/en/office-layout/765
   must_refuse: false
 - id: birth-documents
   service: birth-registration
@@ -65,10 +65,10 @@
   question_ne: म यी सेवाहरू अनलाइन आवेदन दिन सक्छु?
   expected_facts: []
   expected_sources:
-    - https://nepalpassport.gov.np/
+    - https://nepalpassport.gov.np/process/process-7
     - https://dotm.gov.np/
-    - https://moha.gov.np/
-    - https://donidcr.gov.np/
+    - https://www.moha.gov.np/en/office-layout/765
+    - https://donidcr.gov.np/pages/about-frequently-asked-questions--registration-5/
   must_refuse: false
 - id: passport-office
   service: passport
@@ -77,7 +77,7 @@
   expected_facts:
     - Department of Passports
   expected_sources:
-    - https://nepalpassport.gov.np/
+    - https://nepalpassport.gov.np/process/process-8
   must_refuse: false
 - id: ward-office-hours
   service: birth-registration

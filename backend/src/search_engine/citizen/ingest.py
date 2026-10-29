@@ -196,7 +196,7 @@ def _ingest_one(
     last_checked = fetched_at
 
     existing = conn.execute(
-        "select id, content_hash, needs_review, last_reviewed from documents "
+        "select id, service, content_hash, needs_review, last_reviewed from documents "
         "where url = ?",
         (url,),
     ).fetchone()
@@ -225,13 +225,21 @@ def _ingest_one(
 
     document_id = existing["id"]
     old_hash = existing["content_hash"]
+    existing_services = existing["service"].split(",") if existing["service"] else []
+
+    # Merge services: one URL can serve multiple services (e.g. donidcr FAQ for
+    # both birth and marriage registration).
+    merged_services = list(existing_services)
+    if service not in merged_services:
+        merged_services.append(service)
+    merged_service_str = ",".join(merged_services)
 
     if content_hash == old_hash:
         conn.execute(
             "update documents set fetched_at = ?, last_checked = ?, http_status = ?, "
-            "etag = ?, last_modified = ? where id = ?",
+            "etag = ?, last_modified = ?, service = ? where id = ?",
             (fetched_at, last_checked, resp.status_code, etag, last_modified,
-             document_id),
+             merged_service_str, document_id),
         )
         report.unchanged += 1
         return

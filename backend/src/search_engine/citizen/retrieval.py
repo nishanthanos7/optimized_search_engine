@@ -112,8 +112,9 @@ def _is_stale(last_checked: str | None) -> bool:
 
 
 def _search_once(conn, fts_query: str, service: str | None, limit: int):
+    # service may hold comma-separated slugs; match with INSTR.
     if service is not None:
-        sql = _BASE_SQL + " and d.service = ? order by score limit ?"
+        sql = _BASE_SQL + " and instr(d.service, ?) > 0 order by score limit ?"
         params = [fts_query, service, limit]
     else:
         sql = _BASE_SQL + " order by score limit ?"

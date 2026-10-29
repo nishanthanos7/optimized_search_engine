@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS documents (
   status TEXT NOT NULL DEFAULT 'active'
 );
 
+-- service may hold comma-separated slugs when one URL serves multiple services.
+
 CREATE TABLE IF NOT EXISTS chunks (
   id INTEGER PRIMARY KEY,
   document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
