@@ -23,3 +23,19 @@ def test_chunk_text_overlaps_and_preserves_short_text():
     chunks = chunk_text("a" * 1000, max_chars=400, overlap=80)
     assert len(chunks) >= 3
     assert all(len(chunk) <= 400 for chunk in chunks)
+
+
+def test_extract_html_captures_nested_content_without_main_tag():
+    """English passport pages lack <main>/<article>; nested div content
+    must still be extracted (regression fix for boilerplate-only chunks)."""
+    html = (
+        "<html><body><div class='content'>"
+        "<div class='section'>"
+        "<p>The fee for a 34-page passport is NPR 12,000.</p>"
+        "<p>Processing takes 10 to 30 days.</p>"
+        "</div>"
+        "</div></body></html>"
+    )
+    text = extract_html(html)
+    assert "NPR 12,000" in text
+    assert "10 to 30 days" in text

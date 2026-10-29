@@ -1,23 +1,23 @@
 - service: passport
-  url: https://nepalpassport.gov.np/process/process-7
+  url: https://nepalpassport.gov.np/en/process/process-7
   title: How to apply for an ordinary passport
   office: Department of Passports
   doc_type: procedure
   lang: en
 - service: passport
-  url: https://nepalpassport.gov.np/process/process-22
+  url: https://nepalpassport.gov.np/en/process/process-22
   title: Required documents for e-passport application
   office: Department of Passports
   doc_type: procedure
   lang: en
 - service: passport
-  url: https://nepalpassport.gov.np/process/process-25
+  url: https://nepalpassport.gov.np/en/process/process-25
   title: Revenue for passport
   office: Department of Passports
   doc_type: fee
   lang: en
 - service: passport
-  url: https://nepalpassport.gov.np/process/process-8
+  url: https://nepalpassport.gov.np/en/process/process-8
   title: Where to apply for a passport
   office: Department of Passports
   doc_type: procedure

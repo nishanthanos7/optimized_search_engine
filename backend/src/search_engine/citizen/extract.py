@@ -37,52 +37,35 @@ def extract_html(html: str) -> str:
         soup.find("main")
         or soup.find("article")
         or soup.find(role="main")
+        or soup.find("body")
         or soup
     )
 
-    lines: list[str] = []
-    for element in main.find_all(recursive=False):
-        _extract_element_lines(element, lines)
+    # Extract table rows as 'cell | cell' lines, then remove tables so
+    # they are not double-counted in the general text extraction.
+    table_lines: list[str] = []
+    for table in main.find_all("table"):
+        for row in table.find_all("tr"):
+            cells = [
+                normalize_text(cell.get_text(" ", strip=True))
+                for cell in row.find_all(["th", "td"])
+            ]
+            if cells:
+                table_lines.append(" | ".join(cells))
+        table.decompose()
 
-    # Fallback: if nothing extracted, get all text
-    if not lines:
-        text = main.get_text(separator="\n", strip=True)
-    else:
-        text = "\n".join(lines)
-
+    # Use get_text() so nested content (divs, spans, etc.) is captured
+    # regardless of depth. The previous recursive approach only captured
+    # direct text nodes and missed content on English pages that lack
+    # <main>/<article> tags.
+    text = main.get_text(separator="\n", strip=True)
     text = normalize_text(text)
     text = re.sub(r"\n{3,}", "\n\n", text)
+
+    if table_lines:
+        text = "\n".join(table_lines) + "\n" + text
+
     return text.strip()
-
-
-def _extract_element_lines(element, lines: list[str]) -> None:
-    name = (element.name or "").lower()
-    if name in {"script", "style", "nav", "footer", "header", "aside",
-                "noscript", "iframe", "svg", "form"}:
-        return
-    if name == "table":
-        for row in element.find_all("tr"):
-            cells = [normalize_text(cell.get_text(" ", strip=True))
-                     for cell in row.find_all(["th", "td"])]
-            if cells:
-                lines.append(" | ".join(cells))
-        return
-    if name in {"h1", "h2", "h3", "h4", "h5", "h6", "p", "li"}:
-        text = normalize_text(element.get_text(" ", strip=True))
-        if text:
-            lines.append(text)
-        return
-    # Recurse into block containers so nested content is captured
-    if name in {"div", "section", "article", "main", "body", "ul", "ol"}:
-        for child in element.find_all(recursive=False):
-            _extract_element_lines(child, lines)
-        return
-    # Inline content: add as text if it has direct text
-    direct = element.find_all(string=True, recursive=False)
-    if direct:
-        text = normalize_text("".join(direct))
-        if text:
-            lines.append(text)
 
 
 def extract_pdf(data: bytes) -> list[str]:

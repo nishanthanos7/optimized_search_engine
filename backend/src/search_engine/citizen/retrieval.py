@@ -10,7 +10,7 @@ from .db import connect, DEFAULT_DB_PATH
 from .query import build_fts_query, expand_query
 
 MIN_BM25 = -0.1
-MAX_CHUNKS_PER_DOC = 2
+MAX_CHUNKS_PER_DOC = 3
 STALE_DAYS = 30
 
 _DEVANAGARI_DIGITS = str.maketrans("०१२३४५६७८९", "0123456789")
