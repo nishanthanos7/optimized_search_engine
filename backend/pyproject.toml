@@ -11,13 +11,25 @@ dependencies = [
     "fastapi>=0.156.5",
     "google-genai>=2.33.0",
     "httpx>=0.28.1",
+    "pypdf>=5.0.0",
     "python-dotenv>=1.2.4",
+    "pyyaml>=6.0",
     "uvicorn>=0.54.0",
 ]
 
 [project.scripts]
 search-engine = "search_engine:main"
 
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
 [build-system]
 requires = ["uv_build>=0.13.3,<0.14.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1",
+]
