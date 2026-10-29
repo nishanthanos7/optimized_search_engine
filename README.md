@@ -105,6 +105,49 @@ Get full Wikipedia page extract and image.
 
 ---
 
+## Nepal Citizen Services
+
+Index also serves a curated citizen-services assistant for five Nepal government
+services: passport, driving licence, citizenship, birth registration, and marriage
+registration. It answers questions only from official `.gov.np` sources, with
+citations and a "Source checked" date.
+
+### `GET /api/citizen/health` — Citizen DB Health
+
+Reports SQLite FTS5 corpus health.
+
+- **Response:** `{"status": "ok", "document_count": 9, "chunk_count": 33, "last_ingest_at": "..."}`
+
+### `GET /api/citizen/services` — Service List
+
+Returns the five services with source counts and last-checked dates.
+
+### `POST /api/citizen/answer` — Citizen Answer
+
+Stream a grounded, cited answer for a citizen-service question.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `query` | `string` | **Yes** | User's service question (1-2000 chars) |
+| `service` | `string` | No | Service slug to scope the answer |
+| `language` | `"ne" \| "en"` | No | Answer language (default `"ne"`) |
+
+- **Response:** `StreamingResponse` with `text/event-stream` media type
+- **Stream format:** `{"type": "sources", ...}`, `{"type": "text", "content": "..."}`, `{"type": "meta", ...}`
+- **Example:** `POST http://127.0.0.1:8000/api/citizen/answer`
+- **Body:** `{"query": "What documents do I need for a new passport?", "language": "en"}`
+
+### Ingest
+
+```bash
+cd backend
+uv run python -m search_engine.citizen.ingest \
+  --seeds data/citizen/seeds.yaml \
+  --db data/citizen/index.db
+```
+
+---
+
 ### 7. `POST /api/ai-answer` — AI Mode Answer
 
 Stream a grounded answer from NVIDIA Nemotron based on search results.
