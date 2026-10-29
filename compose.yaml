@@ -2,11 +2,12 @@ services:
   search-engine:
     build:
       context: .
+      dockerfile: Dockerfile
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
-      # Removed :ro to allow seamless watch/reload events
-      - ./src:/app/src
-    # Fixed the module path prefix to match your src structure
+      - ./backend/src:/app/src
+    env_file:
+      - .env
     command: ["uvicorn", "src.search_engine.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     init: true
