@@ -12,6 +12,7 @@ from fastapi.responses import StreamingResponse
 from . import SERVICE_BY_SLUG
 from .answer import stream_answer
 from .db import connect, DEFAULT_DB_PATH
+from ..llm import get_provider
 from .schemas import CitizenAnswerRequest, CitizenFeedbackRequest
 
 router = APIRouter()
@@ -64,9 +65,10 @@ async def citizen_answer(request: Request, payload: CitizenAnswerRequest):
 
     async def generate():
         try:
+            provider = get_provider()
             with connect(_db_path(request)) as conn:
                 async for event in stream_answer(
-                    conn, query, service, language, provider=None
+                    conn, query, service, language, provider
                 ):
                     yield json.dumps(event) + "\n"
         except Exception:
