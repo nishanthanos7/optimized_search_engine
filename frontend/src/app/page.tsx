@@ -1,5 +1,5 @@
-import { HomeView } from "@/components/home/home-view";
+import { CitizenHome } from "@/components/citizen/citizen-home";
 
 export default function HomePage() {
-  return <HomeView />;
+  return <CitizenHome />;
 }

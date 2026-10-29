@@ -13,6 +13,7 @@ interface SearchBarProps {
   size?: "lg" | "md";
   placeholder?: string;
   className?: string;
+  ariaLabel?: string;
 }
 
 export function SearchBar({
@@ -22,6 +23,7 @@ export function SearchBar({
   size = "md",
   placeholder = "Search the web…",
   className,
+  ariaLabel = "Search the web",
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -70,7 +72,7 @@ export function SearchBar({
               ? `${box.listId}-option-${box.highlightedIndex}`
               : undefined
           }
-          aria-label="Search the web"
+          aria-label={ariaLabel}
           className={cn(
             "min-w-0 flex-1 bg-transparent outline-none placeholder:text-faint",
             isLarge ? "text-base md:text-lg" : "text-sm",

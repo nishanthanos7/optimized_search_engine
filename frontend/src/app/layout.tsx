@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Index — Search the web, answered by AI",
+  title: "Index — Nepal government services, explained",
   description:
-    "Index searches DuckDuckGo, Bing and Wikipedia at once, then answers with citations.",
+    "Ask about passports, driving licences, citizenship, birth and marriage registration. Answers from official Government of Nepal sources.",
 };
 
 export default function RootLayout({
