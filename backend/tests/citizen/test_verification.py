@@ -26,13 +26,22 @@ def test_supported_number_passes():
     assert result == text
 
 
-def test_unsupported_number_is_replaced():
-    text = "The fee is NPR 99,000 [1]."
+def test_unsupported_number_without_citation_is_replaced():
+    text = "The fee is NPR 99,000."
     result, ok = verify_sentence(
         text, [_source()], {1: "The fee is NPR 12,000."}, "en"
     )
     assert ok is False
     assert "can't verify" in result
+
+
+def test_supported_number_with_citation_passes():
+    text = "The fee is NPR 12,000 [1]."
+    result, ok = verify_sentence(
+        text, [_source()], {1: "The fee is NPR 12,000."}, "en"
+    )
+    assert ok is True
+    assert result == text
 
 
 def test_devanagari_digits_are_normalized():

@@ -206,7 +206,9 @@ export function CitizenAnswerPanel({
                   Source checked:
                 </span>
                 <span className="font-mono">
-                  {meta?.last_checked ?? "—"}
+                  {meta?.last_checked
+                    ? meta.last_checked.split("T")[0]
+                    : "—"}
                 </span>
                 {verificationBadge}
                 {staleBadge}

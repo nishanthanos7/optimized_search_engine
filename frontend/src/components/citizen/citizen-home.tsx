@@ -30,7 +30,7 @@ function CitizenQuestionChip({ question, onSelect }: CitizenQuestionChipProps) {
 }
 
 export function CitizenHome() {
-  const [language, setLanguage] = useState<"ne" | "en">("ne");
+  const [language, setLanguage] = useState<"ne" | "en">("en");
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
 

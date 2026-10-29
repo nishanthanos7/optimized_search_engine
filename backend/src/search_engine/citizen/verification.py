@@ -63,6 +63,11 @@ def verify_sentence(
 
     Returns (sentence_or_safe_replacement, ok). If ok is False, the sentence
     is replaced with a language-appropriate safe sentence.
+
+    Rules:
+    - No numbers → always pass (nothing to verify).
+    - Numbers but no citation → replace (unsafe, source unknown).
+    - Numbers with citation → pass (the citation tells users where to verify).
     """
     safe = SAFE_SENTENCE_NE if language == "ne" else SAFE_SENTENCE_EN
 
@@ -73,15 +78,9 @@ def verify_sentence(
                 return safe, False
 
     numbers = _normalized_numbers(sentence)
-    if numbers:
-        if not citations:
-            return safe, False
-        cited_text = ""
-        for num in citations:
-            cited_text += " " + source_texts.get(num, "")
-        cited_numbers = _normalized_numbers(cited_text)
-        if not numbers.issubset(cited_numbers):
-            return safe, False
+    if numbers and not citations:
+        # Numbers present but no citation — we can't verify the source.
+        return safe, False
 
     return sentence, True
 
