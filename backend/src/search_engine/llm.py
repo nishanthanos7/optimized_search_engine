@@ -51,7 +51,12 @@ class NVIDIAProvider:
             "temperature": 0.3,
             "max_tokens": NVIDIA_MAX_TOKENS,
             "stream": True,
+            # Nemotron streams hidden chain-of-thought in `reasoning_content`,
+            # which consumes max_tokens and truncates the visible answer.
+            "chat_template_kwargs": {"enable_thinking": False},
         }
+        finish_reason = None
+        failed = False
         try:
             async with httpx.AsyncClient(timeout=httpx.Timeout(45.0)) as client:
                 async with client.stream(
@@ -85,13 +90,21 @@ class NVIDIAProvider:
                         choices = chunk.get("choices", [])
                         if not choices:
                             continue
-                        delta = choices[0].get("delta", {})
+                        choice = choices[0]
+                        delta = choice.get("delta", {})
                         content = delta.get("content")
                         if content:
                             yield content
+                        if choice.get("finish_reason"):
+                            finish_reason = choice["finish_reason"]
         except Exception:
             logger.exception("NVIDIA stream failed")
-            return
+            failed = True
+
+        # Tell the caller the answer is incomplete so it is never cached.
+        if failed or finish_reason == "length":
+            yield {"__truncated__": True}
+
 
     async def aclose(self):
         pass  # No persistent client to close

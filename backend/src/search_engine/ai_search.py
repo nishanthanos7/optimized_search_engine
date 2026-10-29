@@ -203,13 +203,21 @@ async def stream_ai_answer(query: str, client):
             try:
                 prompt = build_grounded_prompt(query, sources)
                 answer_parts = []
+                truncated = False
                 async for chunk in provider.stream(prompt):
+                    if isinstance(chunk, dict):
+                        truncated = bool(chunk.get("__truncated__"))
+                        continue
                     answer_parts.append(chunk)
                     yield chunk
                 final_answer = "".join(answer_parts).strip()
                 # If LLM returned any content, use it. Only fall back if truly empty.
                 if final_answer:
-                    _cache_set(cache_key, final_answer, sources)
+                    if truncated:
+                        # Never cache a cut-off answer — Regenerate must retry.
+                        yield "\n\n(Answer may be incomplete — try Regenerate.)"
+                    else:
+                        _cache_set(cache_key, final_answer, sources)
                     yield {"__sources__": sources}
                     return
                 logger.warning(f"LLM returned empty answer (attempt {attempt + 1}/3)")
