@@ -33,21 +33,32 @@ function AiPanelContent({
 
   return (
     <section
-      className="animate-fade-up mb-6 overflow-hidden rounded-2xl border border-border bg-surface shadow-sm"
+      className="animate-fade-up relative mb-6 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025] shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)] backdrop-blur-2xl"
       aria-label="AI answer"
     >
-      <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
-        <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-accent text-white">
-          <Sparkles className="size-4" />
+      {busy && (
+        <div
+          className="absolute inset-x-0 top-0 h-px overflow-hidden bg-white/10"
+          aria-hidden="true"
+        >
+          <span className="thinking-bar block h-full w-1/4 bg-white/80" />
+        </div>
+      )}
+
+      <div className="flex items-center gap-2.5 border-b border-white/[0.07] px-4 py-3">
+        <span className="grid size-7 shrink-0 place-items-center rounded-md bg-white text-black">
+          <Sparkles className="size-3.5" />
         </span>
-        <span className="shrink-0 text-sm font-semibold">Nova AI</span>
-        <span className="min-w-0 flex-1 truncate text-xs text-faint">
+        <span className="shrink-0 text-sm font-semibold tracking-[-0.01em]">
+          Index AI
+        </span>
+        <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-faint">
           {query}
         </span>
         {busy && (
-          <span className="hidden shrink-0 items-center gap-1.5 rounded-full border border-accent/30 bg-accent-soft px-2 py-0.5 text-[11px] font-medium text-accent sm:flex">
-            <span className="size-1.5 animate-pulse rounded-full bg-accent" />
-            {status === "thinking" ? "Reading sources" : "Writing"}
+          <span className="hidden shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-white/70 sm:flex">
+            <span className="size-1.5 animate-pulse rounded-full bg-white" />
+            {status === "thinking" ? "Reading" : "Writing"}
           </span>
         )}
         <Button
@@ -78,7 +89,7 @@ function AiPanelContent({
 
       {(status === "streaming" || status === "done") && (
         <>
-          <div className="px-4 py-4">
+          <div className="px-4 py-5 sm:px-5">
             <AiAnswer
               text={answer}
               sources={sources}
@@ -86,17 +97,17 @@ function AiPanelContent({
             />
           </div>
 
-          <div className="flex items-center justify-between gap-2 border-t border-border bg-surface-muted px-4 py-2">
+          <div className="flex items-center justify-between gap-2 border-t border-white/[0.07] bg-white/[0.015] px-4 py-2">
             <button
               type="button"
               onClick={() => setSourcesOpen((open) => !open)}
-              className="flex items-center gap-1 text-xs font-medium text-muted transition-colors hover:text-foreground"
+              className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-foreground"
               aria-expanded={sourcesOpen}
             >
               Sources ({sources.length})
               <ChevronDown
                 className={cn(
-                  "size-3.5 transition-transform",
+                  "size-3.5 transition-transform duration-200",
                   sourcesOpen && "rotate-180",
                 )}
               />

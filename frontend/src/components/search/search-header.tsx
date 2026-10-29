@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "./search-bar";
 
@@ -23,14 +22,17 @@ export function SearchHeader({
   onToggleAi,
 }: SearchHeaderProps) {
   return (
-    <header className="sticky top-0 z-40 border-b border-border/80 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-2 px-4 py-2.5 sm:flex-nowrap sm:gap-3">
+    <header className="sticky top-0 z-40 border-b border-white/[0.07] bg-black/60 backdrop-blur-xl">
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 py-2.5 sm:flex-nowrap sm:gap-4">
         <Link
           href="/"
-          className="shrink-0 rounded-lg p-0.5"
-          aria-label="Nova home"
+          className="flex shrink-0 items-center gap-2 rounded-lg p-0.5"
+          aria-label="Index home"
         >
           <Logo size="sm" withText={false} />
+          <span className="hidden text-[15px] font-semibold tracking-[-0.02em] sm:inline">
+            Index
+          </span>
         </Link>
 
         <SearchBar
@@ -40,7 +42,7 @@ export function SearchHeader({
           className="order-3 w-full sm:order-none sm:flex-1"
         />
 
-        <div className="ml-auto flex shrink-0 items-center gap-1 sm:ml-0">
+        <div className="ml-auto flex shrink-0 items-center gap-2 sm:ml-0">
           {showAi && (
             <Button
               type="button"
@@ -55,7 +57,6 @@ export function SearchHeader({
               <span>AI</span>
             </Button>
           )}
-          <ThemeToggle />
         </div>
       </div>
     </header>

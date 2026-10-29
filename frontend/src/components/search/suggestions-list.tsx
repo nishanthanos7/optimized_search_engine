@@ -48,7 +48,7 @@ export function SuggestionsList({
       id={id}
       role="listbox"
       aria-label="Search suggestions"
-      className="animate-fade-up absolute inset-x-0 top-[calc(100%+8px)] z-50 max-h-80 overflow-y-auto rounded-xl border border-border bg-surface p-1 shadow-xl"
+      className="animate-fade-up absolute inset-x-0 top-[calc(100%+8px)] z-50 max-h-80 overflow-y-auto rounded-xl border border-white/10 bg-[#080808] p-1 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.95)]"
     >
       {suggestions.map((suggestion, index) => (
         <li
@@ -62,10 +62,10 @@ export function SuggestionsList({
           }}
           onMouseEnter={() => onHover(index)}
           className={cn(
-            "flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
+            "flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors duration-100",
             index === activeIndex
-              ? "bg-surface-muted text-foreground"
-              : "text-muted hover:bg-surface-muted hover:text-foreground",
+              ? "bg-white/[0.07] text-foreground"
+              : "text-muted hover:bg-white/[0.05] hover:text-foreground",
           )}
         >
           <Search className="size-3.5 shrink-0 text-faint" />

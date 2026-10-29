@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AiPanel } from "@/components/ai/ai-panel";
+import { Logo } from "@/components/brand/logo";
 import { AppShell } from "@/components/layout/app-shell";
 import { ResultsSection } from "@/components/results/results-section";
 import { useSearch } from "@/hooks/use-search";
@@ -57,11 +58,12 @@ export function SearchView() {
         />
         <main className="flex flex-1 items-center justify-center px-4 pb-20">
           <div className="w-full max-w-xl text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <Logo size="md" className="justify-center" />
+            <h1 className="mt-6 text-2xl font-semibold tracking-[-0.03em]">
               Start a search
             </h1>
             <p className="mt-2 text-sm text-muted">
-              Search DuckDuckGo, Bing and Wikipedia at once.
+              DuckDuckGo, Bing and Wikipedia — one query, one answer.
             </p>
             <SearchBar
               size="lg"
@@ -84,7 +86,7 @@ export function SearchView() {
         onToggleAi={handleToggleAi}
       />
 
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-20 pt-5">
+      <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-20 pt-6">
         <AiPanel
           key={query}
           query={query}

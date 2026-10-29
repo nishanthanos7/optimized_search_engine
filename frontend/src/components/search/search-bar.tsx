@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Search, X } from "lucide-react";
+import { ArrowRight, Search, X } from "lucide-react";
 import { useSearchBox } from "@/hooks/use-search-box";
 import { cn } from "@/lib/utils";
 import { SuggestionsList } from "./suggestions-list";
@@ -40,7 +40,7 @@ export function SearchBar({
         role="search"
         onSubmit={box.handleSubmit}
         className={cn(
-          "flex items-center gap-2.5 rounded-2xl border border-border bg-surface shadow-sm transition focus-within:border-accent/60 focus-within:ring-4 focus-within:ring-[var(--ring)]",
+          "flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl transition-[border-color,background-color,box-shadow] duration-200 focus-within:border-white/25 focus-within:bg-white/[0.05] focus-within:shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_24px_70px_-28px_rgba(255,255,255,0.28)]",
           isLarge ? "h-14 px-4 md:h-16 md:px-5" : "h-11 px-3.5",
         )}
       >
@@ -80,7 +80,7 @@ export function SearchBar({
           <button
             type="button"
             onClick={box.handleClear}
-            className="grid size-6 shrink-0 place-items-center rounded-full text-faint transition-colors hover:bg-surface-muted hover:text-foreground"
+            className="grid size-6 shrink-0 place-items-center rounded-full text-faint transition-colors hover:bg-white/10 hover:text-foreground"
             aria-label="Clear search"
           >
             <X className="size-4" />
@@ -90,11 +90,11 @@ export function SearchBar({
           type="submit"
           aria-label="Search"
           className={cn(
-            "grid shrink-0 place-items-center rounded-xl bg-accent text-white shadow-sm transition hover:bg-accent/90 active:scale-95",
+            "grid shrink-0 place-items-center rounded-xl bg-white text-black transition-[background-color,transform] duration-150 hover:bg-white/90 active:scale-95",
             isLarge ? "size-10 md:size-11" : "size-8",
           )}
         >
-          <Search className={isLarge ? "size-5" : "size-4"} />
+          <ArrowRight className={isLarge ? "size-5" : "size-4"} />
         </button>
       </form>
 

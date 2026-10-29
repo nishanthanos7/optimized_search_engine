@@ -18,7 +18,7 @@ function renderInline(text: string, sources: AiSource[]): ReactNode {
           target="_blank"
           rel="noopener noreferrer"
           title={source.title}
-          className="mx-0.5 inline-flex size-4 -translate-y-0.5 items-center justify-center rounded bg-accent-soft text-[10px] font-bold text-accent align-middle hover:bg-accent hover:text-white"
+          className="mx-0.5 inline-flex size-4 -translate-y-0.5 items-center justify-center rounded bg-white/10 align-middle font-mono text-[10px] font-semibold text-white/70 transition-colors hover:bg-white hover:text-black"
         >
           {number}
         </a>
@@ -52,7 +52,7 @@ export function AiAnswer({ text, sources, streaming }: AiAnswerProps) {
 
   return (
     <div
-      className="space-y-3 text-[15px] leading-7 text-foreground"
+      className="space-y-3 text-[15px] leading-7 text-[#d4d4d4]"
       aria-live="polite"
     >
       {blocks.map((block, index) => {
@@ -63,7 +63,7 @@ export function AiAnswer({ text, sources, streaming }: AiAnswerProps) {
           return (
             <ul
               key={index}
-              className="list-disc space-y-1 pl-5 marker:text-faint"
+              className="list-disc space-y-1.5 pl-5 marker:text-white/30"
             >
               {lines.map((line, lineIndex) => (
                 <li key={lineIndex}>
@@ -86,7 +86,7 @@ export function AiAnswer({ text, sources, streaming }: AiAnswerProps) {
 
       {streaming && (
         <span
-          className="cursor-blink ml-0.5 inline-block h-4 w-1.5 translate-y-0.5 rounded-sm bg-accent"
+          className="cursor-blink ml-0.5 inline-block h-4 w-1.5 translate-y-0.5 rounded-sm bg-white"
           aria-hidden="true"
         />
       )}

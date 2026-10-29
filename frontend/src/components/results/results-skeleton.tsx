@@ -4,7 +4,7 @@ export function ResultsSkeleton() {
       {[0, 1, 2, 3].map((index) => (
         <div
           key={index}
-          className="rounded-xl border border-border bg-surface p-4 sm:p-5"
+          className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5"
         >
           <div className="flex items-center gap-2.5">
             <div className="skeleton size-8 rounded-lg" />

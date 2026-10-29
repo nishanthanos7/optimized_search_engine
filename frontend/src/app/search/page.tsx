@@ -4,7 +4,7 @@ import { SearchView } from "@/components/search/search-view";
 import { SearchViewSkeleton } from "@/components/search/search-view-skeleton";
 
 export const metadata: Metadata = {
-  title: "Search — Nova",
+  title: "Search — Index",
 };
 
 export default function SearchPage() {

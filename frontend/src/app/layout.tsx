@@ -1,13 +1,24 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Nova — Search the web, answered by AI",
-  description:
-    "A fast AI-powered metasearch engine that searches DuckDuckGo, Bing and Wikipedia at once.",
-};
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
 
-const themeScript = `(function(){try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t="dark";}var r=document.documentElement;r.dataset.theme=t;r.classList.toggle("dark",t==="dark");}catch(e){var r=document.documentElement;r.dataset.theme="dark";r.classList.add("dark");}})();`;
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "Index — Search the web, answered by AI",
+  description:
+    "Index searches DuckDuckGo, Bing and Wikipedia at once, then answers with citations.",
+};
 
 export default function RootLayout({
   children,
@@ -17,15 +28,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="dark"
       data-scroll-behavior="smooth"
-      className="dark"
-      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

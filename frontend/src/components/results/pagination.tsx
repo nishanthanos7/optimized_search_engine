@@ -26,7 +26,7 @@ export function Pagination({
 
   return (
     <nav
-      className="mt-8 flex flex-wrap items-center justify-center gap-1.5 border-t border-border pt-6"
+      className="mt-10 flex flex-wrap items-center justify-center gap-1.5 border-t border-white/[0.07] pt-6"
       aria-label="Search results pages"
     >
       <Button
@@ -49,7 +49,7 @@ export function Pagination({
             onClick={() => onPageChange(pageNumber)}
             disabled={loading}
             aria-current={pageNumber === page ? "page" : undefined}
-            className="w-9 px-0"
+            className="w-9 px-0 font-mono text-xs"
           >
             {pageNumber}
           </Button>

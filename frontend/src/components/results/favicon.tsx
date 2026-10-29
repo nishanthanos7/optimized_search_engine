@@ -19,7 +19,7 @@ export function Favicon({ url, className }: FaviconProps) {
   return (
     <span
       className={cn(
-        "grid size-8 shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-surface-muted text-[11px] font-bold text-faint",
+        "grid size-8 shrink-0 place-items-center overflow-hidden rounded-lg border border-white/10 bg-white/[0.04] text-[11px] font-bold text-faint",
         className,
       )}
       aria-hidden="true"
